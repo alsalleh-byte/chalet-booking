@@ -3681,7 +3681,7 @@ async function saveOrUpdateBooking(
       VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, 'pending', ?
+        ?, ?, 'pending', ?
       )
       ON CONFLICT(booking_number)
       DO UPDATE SET
@@ -4076,4 +4076,4 @@ function getErrorMessage(error) {
   return error instanceof Error
     ? error.message
     : String(error);
-        }
+                  }
