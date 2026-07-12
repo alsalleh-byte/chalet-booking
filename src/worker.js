@@ -141,29 +141,78 @@ CREATE TABLE IF NOT EXISTS admin_states (
 );
 
 INSERT OR IGNORE INTO booking_prices
-  (price_key, title, description, price, is_visible, sort_order)
+  (
+    price_key,
+    title,
+    description,
+    price,
+    is_visible,
+    sort_order
+  )
 VALUES
-  ('weekdays', 'أيام الأسبوع', 'السعر المعتاد لأيام الأسبوع', 300, 1, 1),
-  ('thursday', 'الخميس', 'سعر ليلة الخميس', 450, 1, 2),
-  ('friday', 'الجمعة', 'سعر ليلة الجمعة', 550, 1, 3);
+  (
+    'weekdays',
+    'أيام الأسبوع',
+    'السعر المعتاد لأيام الأسبوع',
+    300,
+    1,
+    1
+  ),
+  (
+    'thursday',
+    'الخميس',
+    'سعر ليلة الخميس',
+    450,
+    1,
+    2
+  ),
+  (
+    'friday',
+    'الجمعة',
+    'سعر ليلة الجمعة',
+    550,
+    1,
+    3
+  );
 
 INSERT OR IGNORE INTO settings
-  (setting_key, setting_value)
+  (
+    setting_key,
+    setting_value
+  )
 VALUES
-  ('prices_section_title', 'أسعار الحجز'),
+  (
+    'prices_section_title',
+    'أسعار الحجز'
+  ),
   (
     'prices_section_description',
     'يتم احتساب سعر كل ليلة تلقائيًا حسب نوع اليوم، وعند توافق التاريخ مع مناسبة أو موسم مفعّل يطبق السعر الخاص به.'
   ),
-  ('insurance_enabled', 'true'),
-  ('insurance_title', 'تفاصيل التأمين المسترد'),
-  ('insurance_amount', '400'),
+  (
+    'insurance_enabled',
+    'true'
+  ),
+  (
+    'insurance_title',
+    'تفاصيل التأمين المسترد'
+  ),
+  (
+    'insurance_amount',
+    '400'
+  ),
   (
     'insurance_description',
     'يتم تحصيل مبلغ التأمين للمحافظة على المكان ومحتوياته، ويعاد بعد انتهاء الحجز وفحص المكان.'
   ),
-  ('booking_enabled', 'true'),
-  ('whatsapp_number', ''),
+  (
+    'booking_enabled',
+    'true'
+  ),
+  (
+    'whatsapp_number',
+    ''
+  ),
   (
     'bank_whatsapp_text',
     'تواصل مع الإدارة لاستلام الحساب البنكي للتحويل.'
@@ -213,10 +262,23 @@ INSERT OR IGNORE INTO payment_bot_settings
     test_amount
   )
 VALUES
-  (1, '', '', 0, 'SAR', 10);
+  (
+    1,
+    '',
+    '',
+    0,
+    'SAR',
+    10
+  );
 
 INSERT OR IGNORE INTO services
-  (name, description, price, is_visible, sort_order)
+  (
+    name,
+    description,
+    price,
+    is_visible,
+    sort_order
+  )
 VALUES
   (
     'تدفئة المسبح',
@@ -314,49 +376,142 @@ async function setupDatabase(env) {
           ok: false,
           error: "لم يتم العثور على ربط قاعدة البيانات DB"
         },
-        { status: 500 }
+        {
+          status: 500
+        }
       );
     }
 
-    await env.DB.exec(SETUP_SQL);
+    const statements = SETUP_SQL
+      .split(";")
+      .map(statement => statement.trim())
+      .filter(statement => statement.length > 0);
 
-    return Response.json({
-      ok: true,
-      message: "تم إنشاء جداول قاعدة البيانات والبيانات الأساسية بنجاح"
-    });
-  } catch (error) {
-    return Response.json(
-      {
-        ok: false,
-        error: error.message
-      },
-      { status: 500 }
-    );
-  }
-}
+    let executedCount = 0;
 
-async function databaseStatus(env) {
-  try {
-    const result = await env.DB
+    /*
+      ننفذ الأوامر على دفعات صغيرة حتى لا تفشل D1
+      عند وجود عدد كبير من الأوامر.
+    */
+    for (
+      let startIndex = 0;
+      startIndex < statements.length;
+      startIndex += 10
+    ) {
+      const group = statements.slice(
+        startIndex,
+        startIndex + 10
+      );
+
+      await env.DB.batch(
+        group.map(sql =>
+          env.DB.prepare(sql)
+        )
+      );
+
+      executedCount += group.length;
+    }
+
+    const tablesResult = await env.DB
       .prepare(`
         SELECT name
         FROM sqlite_master
         WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
         ORDER BY name
       `)
       .all();
 
     return Response.json({
       ok: true,
-      tables: result.results
+      message:
+        "تم إنشاء جداول قاعدة البيانات والبيانات الأساسية بنجاح",
+      statements_executed: executedCount,
+      tables: tablesResult.results
     });
   } catch (error) {
     return Response.json(
       {
         ok: false,
-        error: error.message
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error)
       },
-      { status: 500 }
+      {
+        status: 500
+      }
     );
   }
+}
+
+async function databaseStatus(env) {
+  try {
+    if (!env.DB) {
+      return Response.json(
+        {
+          ok: false,
+          error: "لم يتم العثور على ربط قاعدة البيانات DB"
+        },
+        {
+          status: 500
+        }
+      );
+    }
+
+    const tablesResult = await env.DB
+      .prepare(`
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
+        ORDER BY name
+      `)
+      .all();
+
+    const pricesResult = await env.DB
+      .prepare(`
+        SELECT
+          price_key,
+          title,
+          description,
+          price,
+          is_visible,
+          sort_order
+        FROM booking_prices
+        ORDER BY sort_order ASC
+      `)
+      .all();
+
+    const servicesCountResult = await env.DB
+      .prepare(`
+        SELECT COUNT(*) AS total
+        FROM services
+        WHERE is_deleted = 0
+      `)
+      .first();
+
+    return Response.json({
+      ok: true,
+      database_connected: true,
+      tables: tablesResult.results,
+      booking_prices: pricesResult.results,
+      services_count:
+        Number(servicesCountResult?.total || 0)
+    });
+  } catch (error) {
+    return Response.json(
+      {
+        ok: false,
+        database_connected: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error)
+      },
+      {
+        status: 500
+      }
+    );
   }
+}
