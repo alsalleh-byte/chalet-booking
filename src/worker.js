@@ -382,6 +382,13 @@ export default {
     }
 
     if (
+      url.pathname === "/api/booking-event" &&
+      request.method === "POST"
+    ) {
+      return handleBookingEvent(request, env);
+    }
+
+    if (
       url.pathname === "/setup-webhook" &&
       request.method === "GET"
     ) {
@@ -733,12 +740,74 @@ async function handleTelegramWebhook(
   env
 ) {
   try {
-    const update =
-      await request.json();
+    const update = await request.json();
+
+    const message =
+      update.message || null;
+
+    const callback =
+      update.callback_query || null;
 
     const senderId =
-      update.message?.from?.id ??
-      update.callback_query?.from?.id;
+      message?.from?.id ??
+      callback?.from?.id;
+
+    const chatId =
+      message?.chat?.id ??
+      callback?.message?.chat?.id;
+
+    const chatType =
+      message?.chat?.type ??
+      callback?.message?.chat?.type ??
+      "";
+
+    const text =
+      String(message?.text || "").trim();
+
+    /*
+      يسمح للمدير بحفظ مجموعة الدفع.
+      هذا الأمر يعمل داخل المجموعة فقط.
+    */
+    if (
+      message &&
+      String(senderId) ===
+        String(env.ADMIN_CHAT_ID) &&
+      ["group", "supergroup"].includes(
+        chatType
+      ) &&
+      text === "/setpaymentgroup"
+    ) {
+      await savePaymentGroup(
+        env,
+        chatId,
+        message.chat.title || ""
+      );
+
+      await sendTelegramMessage(
+        env,
+        chatId,
+        "تم ربط هذه المجموعة بنظام الدفع بنجاح ✅\n\nسيتم إرسال المبالغ هنا بصيغة:\nSAR 2.900"
+      );
+
+      return jsonResponse({
+        ok: true
+      });
+    }
+
+    /*
+      لا يعرض لوحة الإدارة داخل المجموعات
+      عند إرسال رسائل عادية.
+    */
+    if (
+      ["group", "supergroup"].includes(
+        chatType
+      )
+    ) {
+      return jsonResponse({
+        ok: true,
+        group_message_ignored: true
+      });
+    }
 
     if (
       String(senderId || "") !==
@@ -750,9 +819,9 @@ async function handleTelegramWebhook(
       });
     }
 
-    if (update.callback_query) {
+    if (callback) {
       await handleCallbackQuery(
-        update.callback_query,
+        callback,
         env
       );
 
@@ -761,9 +830,9 @@ async function handleTelegramWebhook(
       });
     }
 
-    if (update.message) {
+    if (message) {
       await handleAdminMessage(
-        update.message,
+        message,
         env
       );
     }
@@ -772,7 +841,10 @@ async function handleTelegramWebhook(
       ok: true
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Telegram webhook error:",
+      error
+    );
 
     return jsonResponse({
       ok: true,
@@ -789,6 +861,80 @@ async function handleAdminMessage(
   const text = String(
     message.text || ""
   ).trim();
+
+  if (
+    text === "🏠 القائمة الرئيسية"
+  ) {
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await sendMainMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
+
+  if (text === "💰 الأسعار") {
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await showPricesMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
+
+  if (text === "🧰 الخدمات") {
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await showServicesMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
+
+  if (
+    text === "📋 طلبات الحجز"
+  ) {
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await showBookingsMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
+
+  if (text === "💳 طرق الدفع") {
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await showPaymentMethodsMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
 
   if (
     text === "/start" ||
@@ -1341,6 +1487,56 @@ async function handleCallbackQuery(
   }
 
   if (
+    data === "payment_bot_test"
+  ) {
+    const result =
+      await sendAmountToPaymentGroup(
+        env,
+        10
+      );
+
+    await sendTelegramMessage(
+      env,
+      chatId,
+      result.ok
+        ? "تم إرسال SAR 10 إلى مجموعة الدفع بنجاح ✅"
+        : `فشل الاختبار:\n${result.error}`
+    );
+
+    return;
+  }
+
+  if (
+    data === "payment_bot_delete"
+  ) {
+    await env.DB
+      .prepare(`
+        UPDATE payment_bot_settings
+        SET
+          bot_chat_id = '',
+          bot_username = '',
+          forward_enabled = 0,
+          updated_at =
+            CURRENT_TIMESTAMP
+        WHERE id = 1
+      `)
+      .run();
+
+    await sendTelegramMessage(
+      env,
+      chatId,
+      "تم حذف ربط مجموعة الدفع."
+    );
+
+    await showPaymentBotMenu(
+      env,
+      chatId
+    );
+
+    return;
+  }
+
+  if (
     data === "menu_payment_bot"
   ) {
     await showPaymentBotMenu(
@@ -1416,6 +1612,47 @@ async function sendMainMenu(
   text =
     "لوحة إدارة نظام حجز الشاليه\n\nاختر القسم المطلوب:"
 ) {
+  /*
+    لوحة ثابتة أسفل خانة الكتابة.
+  */
+  await sendTelegramMessage(
+    env,
+    chatId,
+    "تم تثبيت لوحة التحكم أسفل المحادثة ✅",
+    {
+      keyboard: [
+        [
+          {
+            text: "🏠 القائمة الرئيسية"
+          }
+        ],
+        [
+          {
+            text: "💰 الأسعار"
+          },
+          {
+            text: "🧰 الخدمات"
+          }
+        ],
+        [
+          {
+            text: "📋 طلبات الحجز"
+          },
+          {
+            text: "💳 طرق الدفع"
+          }
+        ]
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+      input_field_placeholder:
+        "اختر من لوحة الإدارة"
+    }
+  );
+
+  /*
+    لوحة الأقسام داخل الرسالة.
+  */
   await sendTelegramMessage(
     env,
     chatId,
@@ -2798,7 +3035,8 @@ async function showPaymentBotMenu(
         bot_username,
         bot_chat_id,
         forward_enabled,
-        amount_prefix
+        amount_prefix,
+        test_amount
       FROM payment_bot_settings
       WHERE id = 1
     `)
@@ -2809,27 +3047,69 @@ async function showPaymentBotMenu(
       settings?.forward_enabled || 0
     ) === 1;
 
+  const linked =
+    Boolean(
+      String(
+        settings?.bot_chat_id || ""
+      ).trim()
+    );
+
+  const text =
+    "🤖 إعدادات إرسال المبلغ\n\n" +
+    `المجموعة: ${
+      settings?.bot_username ||
+      "غير مرتبطة"
+    }\n` +
+    `معرف المجموعة: ${
+      settings?.bot_chat_id ||
+      "غير موجود"
+    }\n` +
+    `الإرسال: ${
+      enabled
+        ? "مفعّل ✅"
+        : "متوقف 🚫"
+    }\n\n` +
+    "لربط مجموعة جديدة:\n" +
+    "أرسل داخل المجموعة الأمر:\n" +
+    "/setpaymentgroup\n\n" +
+    "صيغة الإرسال:\n" +
+    `${settings?.amount_prefix || "SAR"} 2.900`;
+
   await sendTelegramMessage(
     env,
     chatId,
-    "🤖 إعدادات بوت الدفع\n\n" +
-      `البوت: ${settings?.bot_username || "غير مضاف"}\n` +
-      `الحالة: ${enabled ? "مفعّل ✅" : "متوقف 🚫"}\n` +
-      `مثال: ${settings?.amount_prefix || "SAR"} 6.500`,
+    text,
     {
       inline_keyboard: [
         [
           {
-            text:
-              enabled
-                ? "إيقاف الإرسال"
-                : "تشغيل الإرسال",
+            text: enabled
+              ? "⏸ إيقاف الإرسال"
+              : "▶️ تشغيل الإرسال",
             callback_data:
               "payment_bot_toggle"
           }
         ],
+        [
+          {
+            text: "🧪 اختبار SAR 10",
+            callback_data:
+              "payment_bot_test"
+          }
+        ],
+        linked
+          ? [
+              {
+                text: "🗑 حذف ربط المجموعة",
+                callback_data:
+                  "payment_bot_delete"
+              }
+            ]
+          : [],
         backButton()
-      ]
+      ].filter(
+        row => row.length > 0
+      )
     }
   );
 }
@@ -3096,6 +3376,591 @@ async function toggleSettingBoolean(
     .run();
 }
 
+/* =========================
+   ربط مجموعة الدفع
+========================= */
+
+async function savePaymentGroup(
+  env,
+  chatId,
+  groupTitle
+) {
+  await env.DB
+    .prepare(`
+      UPDATE payment_bot_settings
+      SET
+        bot_chat_id = ?,
+        bot_username = ?,
+        forward_enabled = 1,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE id = 1
+    `)
+    .bind(
+      String(chatId),
+      groupTitle
+    )
+    .run();
+}
+
+function formatPaymentAmount(
+  value
+) {
+  return Number(value || 0)
+    .toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3,
+        useGrouping: false
+      }
+    );
+}
+
+async function sendAmountToPaymentGroup(
+  env,
+  amount
+) {
+  try {
+    const settings = await env.DB
+      .prepare(`
+        SELECT
+          bot_chat_id,
+          forward_enabled,
+          amount_prefix
+        FROM payment_bot_settings
+        WHERE id = 1
+      `)
+      .first();
+
+    if (
+      Number(
+        settings?.forward_enabled || 0
+      ) !== 1
+    ) {
+      return {
+        ok: false,
+        skipped: true,
+        error:
+          "إرسال المبلغ متوقف"
+      };
+    }
+
+    const destination =
+      String(
+        settings?.bot_chat_id || ""
+      ).trim();
+
+    if (!destination) {
+      return {
+        ok: false,
+        error:
+          "مجموعة الدفع غير مرتبطة"
+      };
+    }
+
+    const message =
+      `${settings?.amount_prefix || "SAR"} ` +
+      formatPaymentAmount(amount);
+
+    await sendTelegramMessage(
+      env,
+      destination,
+      message
+    );
+
+    return {
+      ok: true,
+      message
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        getErrorMessage(error)
+    };
+  }
+}
+
+/* =========================
+   حفظ الحجز وإرسال الفاتورة
+========================= */
+
+async function handleBookingEvent(
+  request,
+  env
+) {
+  try {
+    const body =
+      await request.json();
+
+    const eventType =
+      String(
+        body.event_type || ""
+      );
+
+    if (
+      ![
+        "payment_page",
+        "payment_click"
+      ].includes(eventType)
+    ) {
+      return jsonResponse(
+        {
+          ok: false,
+          error:
+            "نوع العملية غير صحيح"
+        },
+        400
+      );
+    }
+
+    const booking =
+      body.booking || {};
+
+    validateBookingPayload(
+      booking
+    );
+
+    const saved =
+      await saveOrUpdateBooking(
+        env,
+        booking,
+        eventType
+      );
+
+    let invoiceResult = {
+      ok: false,
+      skipped: true
+    };
+
+    if (body.invoice_image) {
+      invoiceResult =
+        await sendInvoiceImageToAdmin(
+          env,
+          body.invoice_image,
+          booking,
+          eventType
+        );
+    }
+
+    const amountResult =
+      await sendAmountToPaymentGroup(
+        env,
+        booking.amounts.total
+      );
+
+    await env.DB
+      .prepare(`
+        UPDATE bookings
+        SET
+          invoice_sent_count =
+            invoice_sent_count + ?,
+          payment_amount_forwarded = ?,
+          updated_at =
+            CURRENT_TIMESTAMP
+        WHERE id = ?
+      `)
+      .bind(
+        invoiceResult.ok ? 1 : 0,
+        amountResult.ok ? 1 : 0,
+        saved.bookingId
+      )
+      .run();
+
+    return jsonResponse({
+      ok: true,
+      booking_id:
+        saved.bookingId,
+      booking_number:
+        booking.booking_number,
+      event_type:
+        eventType,
+      invoice:
+        invoiceResult,
+      payment_amount:
+        amountResult
+    });
+  } catch (error) {
+    return jsonResponse(
+      {
+        ok: false,
+        error:
+          getErrorMessage(error)
+      },
+      400
+    );
+  }
+}
+
+function validateBookingPayload(
+  booking
+) {
+  const required = [
+    booking.booking_number,
+    booking.customer?.full_name,
+    booking.customer?.phone,
+    booking.customer?.city,
+    booking.booking
+      ?.check_in_date,
+    booking.booking
+      ?.check_out_date
+  ];
+
+  if (
+    required.some(
+      value =>
+        !String(value || "").trim()
+    )
+  ) {
+    throw new Error(
+      "بيانات الحجز غير مكتملة"
+    );
+  }
+
+  const total =
+    Number(
+      booking.amounts?.total
+    );
+
+  if (
+    !Number.isFinite(total) ||
+    total < 0
+  ) {
+    throw new Error(
+      "مبلغ الحجز غير صحيح"
+    );
+  }
+}
+
+async function saveOrUpdateBooking(
+  env,
+  data,
+  eventType
+) {
+  const customer =
+    data.customer;
+
+  const booking =
+    data.booking;
+
+  const amounts =
+    data.amounts;
+
+  const paymentMethod =
+    String(
+      data.payment_method || ""
+    );
+
+  await env.DB
+    .prepare(`
+      INSERT INTO bookings (
+        booking_number,
+        full_name,
+        phone,
+        city,
+        district,
+        booking_type,
+        adults,
+        children,
+        people_total,
+        check_in_date,
+        check_in_time,
+        check_out_date,
+        check_out_time,
+        nights_count,
+        notes,
+        stay_total,
+        services_total,
+        insurance_total,
+        grand_total,
+        selected_payment_method,
+        payment_status,
+        booking_status,
+        created_at,
+        updated_at
+      )
+      VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, 'pending', ?, 
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+      ON CONFLICT(booking_number)
+      DO UPDATE SET
+        full_name =
+          excluded.full_name,
+        phone =
+          excluded.phone,
+        city =
+          excluded.city,
+        district =
+          excluded.district,
+        booking_type =
+          excluded.booking_type,
+        adults =
+          excluded.adults,
+        children =
+          excluded.children,
+        people_total =
+          excluded.people_total,
+        check_in_date =
+          excluded.check_in_date,
+        check_in_time =
+          excluded.check_in_time,
+        check_out_date =
+          excluded.check_out_date,
+        check_out_time =
+          excluded.check_out_time,
+        nights_count =
+          excluded.nights_count,
+        notes =
+          excluded.notes,
+        stay_total =
+          excluded.stay_total,
+        services_total =
+          excluded.services_total,
+        insurance_total =
+          excluded.insurance_total,
+        grand_total =
+          excluded.grand_total,
+        selected_payment_method =
+          excluded.selected_payment_method,
+        booking_status =
+          excluded.booking_status,
+        updated_at =
+          CURRENT_TIMESTAMP
+    `)
+    .bind(
+      data.booking_number,
+      customer.full_name,
+      customer.phone,
+      customer.city,
+      customer.district || "",
+      customer.booking_type,
+      Number(
+        customer.adults || 0
+      ),
+      Number(
+        customer.children || 0
+      ),
+      Number(
+        customer.people_total || 0
+      ),
+      booking.check_in_date,
+      booking.check_in_time,
+      booking.check_out_date,
+      booking.check_out_time,
+      Number(
+        booking.nights_count || 0
+      ),
+      customer.notes || "",
+      Number(
+        amounts.stay || 0
+      ),
+      Number(
+        amounts.services || 0
+      ),
+      Number(
+        amounts.insurance || 0
+      ),
+      Number(
+        amounts.total || 0
+      ),
+      paymentMethod,
+      eventType ===
+        "payment_click"
+        ? "payment_selected"
+        : "payment_page"
+    )
+    .run();
+
+  const row = await env.DB
+    .prepare(`
+      SELECT id
+      FROM bookings
+      WHERE booking_number = ?
+    `)
+    .bind(data.booking_number)
+    .first();
+
+  const bookingId =
+    Number(row.id);
+
+  /*
+    نستبدل الخدمات والليالي
+    بأحدث نسخة من الطلب.
+  */
+  await env.DB.batch([
+    env.DB
+      .prepare(`
+        DELETE FROM booking_services
+        WHERE booking_id = ?
+      `)
+      .bind(bookingId),
+
+    env.DB
+      .prepare(`
+        DELETE FROM booking_nights
+        WHERE booking_id = ?
+      `)
+      .bind(bookingId)
+  ]);
+
+  const serviceStatements =
+    (booking.services || [])
+      .map(service =>
+        env.DB
+          .prepare(`
+            INSERT INTO booking_services (
+              booking_id,
+              service_id,
+              service_name,
+              service_price
+            )
+            VALUES (?, ?, ?, ?)
+          `)
+          .bind(
+            bookingId,
+            Number(service.id || 0) ||
+              null,
+            service.name,
+            Number(
+              service.price || 0
+            )
+          )
+      );
+
+  const nightStatements =
+    (booking.nights || [])
+      .map(night =>
+        env.DB
+          .prepare(`
+            INSERT INTO booking_nights (
+              booking_id,
+              night_date,
+              price_type,
+              price_title,
+              night_price
+            )
+            VALUES (?, ?, ?, ?, ?)
+          `)
+          .bind(
+            bookingId,
+            night.date,
+            night.type || "",
+            night.title || "",
+            Number(
+              night.price || 0
+            )
+          )
+      );
+
+  const statements = [
+    ...serviceStatements,
+    ...nightStatements
+  ];
+
+  if (statements.length) {
+    await env.DB.batch(
+      statements
+    );
+  }
+
+  return {
+    bookingId
+  };
+}
+
+async function sendInvoiceImageToAdmin(
+  env,
+  dataUrl,
+  booking,
+  eventType
+) {
+  try {
+    const match =
+      String(dataUrl).match(
+        /^data:image\/png;base64,(.+)$/
+      );
+
+    if (!match) {
+      throw new Error(
+        "صيغة صورة الفاتورة غير صحيحة"
+      );
+    }
+
+    const bytes =
+      Uint8Array.from(
+        atob(match[1]),
+        character =>
+          character.charCodeAt(0)
+      );
+
+    const caption =
+      eventType ===
+      "payment_click"
+        ? "🔄 فاتورة محدثة عند الضغط على الانتقال للدفع"
+        : "🧾 فاتورة جديدة عند دخول صفحة الدفع";
+
+    const form =
+      new FormData();
+
+    form.append(
+      "chat_id",
+      String(
+        env.ADMIN_CHAT_ID
+      )
+    );
+
+    form.append(
+      "caption",
+      `${caption}\nرقم الحجز: ${booking.booking_number}\nالمبلغ: ${formatMoney(booking.amounts.total)}`
+    );
+
+    form.append(
+      "photo",
+      new Blob(
+        [bytes],
+        {
+          type: "image/png"
+        }
+      ),
+      `${booking.booking_number}.png`
+    );
+
+    const response =
+      await fetch(
+        `https://api.telegram.org/bot${env.ADMIN_BOT_TOKEN}/sendPhoto`,
+        {
+          method: "POST",
+          body: form
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.ok) {
+      throw new Error(
+        result.description ||
+        "تعذر إرسال الفاتورة"
+      );
+    }
+
+    return {
+      ok: true
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        getErrorMessage(error)
+    };
+  }
+}
+
 async function telegramApi(
   env,
   method,
@@ -3251,4 +4116,4 @@ function getErrorMessage(error) {
   return error instanceof Error
     ? error.message
     : String(error);
-  }
+      }
