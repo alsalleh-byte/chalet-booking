@@ -1,0 +1,14 @@
+{
+  "name": "chalet-booking",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-12",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
