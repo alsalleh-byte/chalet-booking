@@ -2,21 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>طلب حجز</title>
-
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     :root {
       --primary: #1f705a;
       --primary-dark: #165342;
@@ -31,29 +24,22 @@
       --gold-border: #ead8b8;
       --shadow: 0 15px 40px rgba(22, 67, 53, 0.09);
     }
-
     body {
       min-height: 100vh;
       background: var(--background);
       color: var(--text);
       font-family: Tahoma, Arial, sans-serif;
     }
-
-    button,
-    input,
-    textarea {
+    button, input, textarea {
       font-family: inherit;
     }
-
     button {
       cursor: pointer;
     }
-
     .container {
       width: min(calc(100% - 28px), 850px);
       margin: auto;
     }
-
     .loading-screen {
       position: fixed;
       inset: 0;
@@ -64,7 +50,6 @@
       padding: 25px;
       background: var(--background);
     }
-
     .loading-box {
       width: min(100%, 380px);
       padding: 30px 20px;
@@ -73,7 +58,6 @@
       background: white;
       box-shadow: var(--shadow);
     }
-
     .loader {
       width: 48px;
       height: 48px;
@@ -83,25 +67,19 @@
       border-radius: 50%;
       animation: rotate 0.8s linear infinite;
     }
-
     @keyframes rotate {
-      to {
-        transform: rotate(360deg);
-      }
+      to { transform: rotate(360deg); }
     }
-
     .loading-box strong {
       display: block;
       margin-bottom: 8px;
       font-size: 17px;
     }
-
     .loading-box p {
       color: var(--muted);
       font-size: 13px;
       line-height: 1.8;
     }
-
     .system-error {
       display: none;
       margin: 25px auto;
@@ -112,7 +90,6 @@
       border-radius: 18px;
       background: #fff1f1;
     }
-
     .closed-message {
       display: none;
       margin: 25px auto;
@@ -123,21 +100,14 @@
       border-radius: 20px;
       background: #fff8e9;
     }
-
     .hero {
       position: relative;
       overflow: hidden;
       padding: 38px 0 68px;
       color: white;
-      background:
-        linear-gradient(
-          135deg,
-          #17513f,
-          #23765f
-        );
+      background: linear-gradient(135deg, #17513f, #23765f);
       border-radius: 0 0 35px 35px;
     }
-
     .hero::before {
       content: "";
       position: absolute;
@@ -149,11 +119,8 @@
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 340'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M142 93c-26-38-64-53-112-44 30 30 64 45 105 45-35 4-69 24-96 57 45 4 81-7 109-34-10 38-6 73 11 106 17-37 20-73 9-108 30 25 66 36 109 31-27-31-59-48-97-52 39-4 70-20 93-49-45-5-82 8-108 39 2-40-10-74-37-101-12 41-7 77 14 110z'/%3E%3Cpath d='M137 103c10 4 18 12 21 23 14 54 21 109 22 165h-48c14-58 21-115 20-171-1-7-6-13-15-17z'/%3E%3C/g%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 340'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M142 93c-26-38-64-53-112-44 30 30 64 45 105 45-35 4-69 24-96 57 45 4 81-7 109-34-10 38-6 73 11 106 17-37 20-73 9-108 30 25 66 36 109 31-27-31-59-48-97-52 39-4 70-20 93-49-45-5-82 8-108 39 2-40-10-74-37-101-12 41-7 77 14 110z'/%3E%3Cpath d='M137 103c10 4 18 12 21 23 14 54 21 109 22 165h-48c14-58 21-115 20-171-1-7-6-13-15-17z'/%3E%3C/g%3E%3C/svg%3E");
     }
-
     .hero::after {
       content: "";
       position: absolute;
@@ -164,16 +131,12 @@
       opacity: 0.08;
       background-repeat: no-repeat;
       background-size: contain;
-
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 340'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M142 93c-26-38-64-53-112-44 30 30 64 45 105 45-35 4-69 24-96 57 45 4 81-7 109-34-10 38-6 73 11 106 17-37 20-73 9-108 30 25 66 36 109 31-27-31-59-48-97-52 39-4 70-20 93-49-45-5-82 8-108 39 2-40-10-74-37-101-12 41-7 77 14 110z'/%3E%3Cpath d='M137 103c10 4 18 12 21 23 14 54 21 109 22 165h-48c14-58 21-115 20-171-1-7-6-13-15-17z'/%3E%3C/g%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 340'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M142 93c-26-38-64-53-112-44 30 30 64 45 105 45-35 4-69 24-96 57 45 4 81-7 109-34-10 38-6 73 11 106 17-37 20-73 9-108 30 25 66 36 109 31-27-31-59-48-97-52 39-4 70-20 93-49-45-5-82 8-108 39 2-40-10-74-37-101-12 41-7 77 14 110z'/%3E%3Cpath d='M137 103c10 4 18 12 21 23 14 54 21 109 22 165h-48c14-58 21-115 20-171-1-7-6-13-15-17z'/%3E%3C/g%3E%3C/svg%3E");
     }
-
     .hero-content {
       position: relative;
       z-index: 2;
     }
-
     .hero-badge {
       width: fit-content;
       padding: 9px 15px;
@@ -183,19 +146,16 @@
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
-
     .hero h1 {
       font-size: 30px;
       margin-bottom: 13px;
     }
-
     .hero p {
       max-width: 650px;
       font-size: 14px;
       line-height: 2;
       opacity: 0.92;
     }
-
     .progress-card {
       position: relative;
       z-index: 4;
@@ -205,13 +165,11 @@
       background: white;
       box-shadow: var(--shadow);
     }
-
     .progress {
       position: relative;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
     }
-
     .progress::before {
       content: "";
       position: absolute;
@@ -221,13 +179,11 @@
       height: 3px;
       background: #e4ebe7;
     }
-
     .progress-step {
       position: relative;
       z-index: 2;
       text-align: center;
     }
-
     .progress-number {
       width: 39px;
       height: 39px;
@@ -241,23 +197,19 @@
       justify-content: center;
       font-weight: bold;
     }
-
     .progress-step span {
       color: var(--muted);
       font-size: 10px;
     }
-
     .progress-step.active .progress-number,
     .progress-step.done .progress-number {
       color: white;
       background: var(--primary);
     }
-
     .progress-step.active span {
       color: var(--primary-dark);
       font-weight: bold;
     }
-
     .main-card {
       margin: 19px 0 35px;
       padding: 23px 18px;
@@ -265,82 +217,61 @@
       background: white;
       box-shadow: var(--shadow);
     }
-
     .step-page {
       display: none;
     }
-
     .step-page.active {
       display: block;
       animation: pageShow 0.25s ease;
     }
-
     @keyframes pageShow {
-      from {
-        opacity: 0;
-        transform: translateY(7px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     .section-header {
       margin-bottom: 23px;
     }
-
     .step-name {
       color: var(--primary);
       font-size: 13px;
       font-weight: bold;
       margin-bottom: 8px;
     }
-
     .section-header h2 {
       margin-bottom: 8px;
       font-size: 22px;
     }
-
     .section-header p {
       color: var(--muted);
       font-size: 12px;
       line-height: 1.9;
     }
-
     .sub-title {
       margin: 16px 0 14px;
       padding-bottom: 11px;
       border-bottom: 1px solid var(--border);
       font-size: 15px;
     }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
     }
-
     .field {
       margin-bottom: 15px;
     }
-
     .field.full {
       grid-column: 1 / -1;
     }
-
     .field label {
       display: block;
       margin-bottom: 9px;
       font-size: 13px;
       font-weight: bold;
     }
-
     .required {
       color: var(--danger);
     }
-
     .field input,
     .field textarea {
       width: 100%;
@@ -352,31 +283,26 @@
       font-size: 14px;
       transition: 0.2s;
     }
-
     .field input {
       height: 53px;
       padding: 0 14px;
     }
-
     .field textarea {
       min-height: 115px;
       padding: 14px;
       resize: vertical;
     }
-
     .field input:focus,
     .field textarea:focus {
       border-color: var(--primary);
       background: white;
       box-shadow: 0 0 0 3px rgba(31, 112, 90, 0.1);
     }
-
     .field.error input,
     .field.error textarea {
       border-color: var(--danger);
       box-shadow: 0 0 0 3px rgba(216, 79, 79, 0.11);
     }
-
     .error-message {
       display: none;
       margin-top: 7px;
@@ -384,22 +310,18 @@
       font-size: 12px;
       line-height: 1.7;
     }
-
     .field.error .error-message {
       display: block;
     }
-
     .booking-types {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-bottom: 18px;
     }
-
     .booking-type input {
       display: none;
     }
-
     .booking-type label {
       min-height: 70px;
       border: 1px solid var(--border);
@@ -412,21 +334,18 @@
       font-weight: bold;
       cursor: pointer;
     }
-
     .booking-type input:checked + label {
       color: var(--primary-dark);
       border-color: var(--primary);
       background: var(--primary-soft);
       box-shadow: 0 0 0 2px rgba(31, 112, 90, 0.08);
     }
-
     .prices-panel {
       margin: 18px 0;
       overflow: hidden;
       border: 1px solid #d8e6e0;
       border-radius: 19px;
     }
-
     .prices-title {
       padding: 15px;
       color: var(--primary-dark);
@@ -434,11 +353,9 @@
       font-size: 15px;
       font-weight: bold;
     }
-
     .prices-body {
       padding: 5px 15px;
     }
-
     .price-line {
       display: flex;
       align-items: flex-start;
@@ -448,15 +365,12 @@
       border-bottom: 1px dashed #dfe5e2;
       font-size: 13px;
     }
-
     .price-line:last-child {
       border-bottom: 0;
     }
-
     .price-line span {
       color: #66736e;
     }
-
     .price-line small {
       display: block;
       margin-top: 4px;
@@ -464,12 +378,10 @@
       font-size: 10px;
       line-height: 1.6;
     }
-
     .price-line strong {
       color: var(--primary-dark);
       white-space: nowrap;
     }
-
     .price-note {
       margin-top: 13px;
       padding: 14px;
@@ -480,12 +392,10 @@
       font-size: 12px;
       line-height: 1.9;
     }
-
     .services-list {
       display: grid;
       gap: 12px;
     }
-
     .service-item {
       display: grid;
       grid-template-columns: auto 1fr auto;
@@ -497,67 +407,56 @@
       background: #fcfdfc;
       cursor: pointer;
     }
-
     .service-item.selected {
       border-color: var(--primary);
       background: var(--primary-soft);
       box-shadow: 0 0 0 2px rgba(31, 112, 90, 0.07);
     }
-
     .service-item.error {
       border-color: var(--danger);
       box-shadow: 0 0 0 3px rgba(216, 79, 79, 0.11);
     }
-
     .service-item input {
       width: 19px;
       height: 19px;
       accent-color: var(--primary);
     }
-
     .service-info strong {
       display: block;
       margin-bottom: 5px;
       font-size: 14px;
     }
-
     .service-info small {
       display: block;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.7;
     }
-
     .service-price {
       color: var(--primary-dark);
       font-size: 13px;
       font-weight: bold;
       white-space: nowrap;
     }
-
     .no-services-item {
       margin-top: 5px;
       border-style: dashed;
     }
-
     .services-error {
       display: none;
       margin-top: 10px;
       color: var(--danger);
       font-size: 12px;
     }
-
     .services-error.show {
       display: block;
     }
-
     .summary-box {
       margin-bottom: 16px;
       overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 19px;
     }
-
     .summary-title {
       padding: 15px;
       color: var(--primary-dark);
@@ -565,11 +464,9 @@
       font-size: 15px;
       font-weight: bold;
     }
-
     .summary-content {
       padding: 5px 15px;
     }
-
     .summary-row {
       display: flex;
       justify-content: space-between;
@@ -580,33 +477,23 @@
       font-size: 13px;
       line-height: 1.8;
     }
-
     .summary-row:last-child {
       border-bottom: 0;
     }
-
     .summary-row span {
       color: var(--muted);
       flex-shrink: 0;
     }
-
     .summary-row strong {
       text-align: left;
     }
-
     .amount-card {
       margin-top: 16px;
       padding: 19px;
       color: white;
       border-radius: 21px;
-      background:
-        linear-gradient(
-          135deg,
-          var(--primary-dark),
-          var(--primary)
-        );
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     }
-
     .amount-row {
       display: flex;
       justify-content: space-between;
@@ -614,7 +501,6 @@
       padding: 9px 0;
       font-size: 14px;
     }
-
     .amount-row.total {
       margin-top: 9px;
       padding-top: 16px;
@@ -622,14 +508,12 @@
       font-size: 19px;
       font-weight: bold;
     }
-
     .small-note {
       display: block;
       margin-top: 4px;
       color: #c8eddf;
       font-size: 10px;
     }
-
     .insurance-box {
       margin-top: 17px;
       padding: 17px;
@@ -637,39 +521,26 @@
       border-radius: 18px;
       background: var(--gold-soft);
     }
-
     .insurance-box.error {
       border-color: var(--danger);
       box-shadow: 0 0 0 3px rgba(216, 79, 79, 0.13);
       animation: shake 0.25s linear 2;
     }
-
     @keyframes shake {
-      25% {
-        transform: translateX(-4px);
-      }
-
-      50% {
-        transform: translateX(4px);
-      }
-
-      75% {
-        transform: translateX(-3px);
-      }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-3px); }
     }
-
     .insurance-box h3 {
       margin-bottom: 9px;
       color: #745426;
       font-size: 15px;
     }
-
     .insurance-box p {
       color: #755f3f;
       font-size: 12px;
       line-height: 1.95;
     }
-
     .agreement {
       display: flex;
       align-items: flex-start;
@@ -679,7 +550,6 @@
       font-size: 12px;
       line-height: 1.8;
     }
-
     .agreement input {
       width: 19px;
       height: 19px;
@@ -687,24 +557,19 @@
       flex-shrink: 0;
       accent-color: var(--primary);
     }
-
     .payment-list {
       display: grid;
       gap: 13px;
     }
-
     .payment-item {
       display: block;
     }
-
     .payment-item.hidden {
       display: none;
     }
-
     .payment-item input {
       display: none;
     }
-
     .payment-item label {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -717,30 +582,25 @@
       background: #fcfdfc;
       cursor: pointer;
     }
-
     .payment-item.selected label {
       border-color: var(--primary);
       background: var(--primary-soft);
       box-shadow: 0 0 0 2px rgba(31, 112, 90, 0.08);
     }
-
     .payment-item.error label {
       border-color: var(--danger);
       box-shadow: 0 0 0 3px rgba(216, 79, 79, 0.1);
     }
-
     .payment-text strong {
       display: block;
       margin-bottom: 6px;
       font-size: 15px;
     }
-
     .payment-text small {
       color: var(--muted);
       font-size: 11px;
       line-height: 1.8;
     }
-
     .payment-radio {
       width: 24px;
       height: 24px;
@@ -748,28 +608,23 @@
       border-radius: 50%;
       background: white;
     }
-
     .payment-item.selected .payment-radio {
       border: 7px solid var(--primary);
     }
-
     .payment-error-text {
       display: none;
       margin: 7px 5px 0;
       color: var(--danger);
       font-size: 11px;
     }
-
     .payment-item.error .payment-error-text {
       display: block;
     }
-
     .navigation-buttons {
       display: flex;
       gap: 11px;
       margin-top: 23px;
     }
-
     .button {
       flex: 1;
       height: 53px;
@@ -778,51 +633,40 @@
       font-size: 14px;
       font-weight: bold;
     }
-
     .button-primary {
       color: white;
       background: var(--primary);
     }
-
     .button-secondary {
       color: #53605b;
       background: #edf1ef;
     }
-
     @media (max-width: 620px) {
       .grid {
         grid-template-columns: 1fr;
       }
-
       .field.full {
         grid-column: auto;
       }
-
       .main-card {
         padding: 21px 14px;
       }
-
       .service-item {
         grid-template-columns: auto 1fr;
       }
-
       .service-price {
         grid-column: 2;
       }
-
       .hero h1 {
         font-size: 27px;
       }
-
       .progress-step span {
         font-size: 9px;
       }
     }
   </style>
 </head>
-
 <body>
-
   <div id="loadingScreen" class="loading-screen">
     <div class="loading-box">
       <div class="loader"></div>
@@ -834,629 +678,234 @@
   <header class="hero">
     <div class="container hero-content">
       <div class="hero-badge">نظام حجز إلكتروني</div>
-
       <h1>طلب حجز</h1>
-
-      <p>
-        اختر موعد الحجز وعدد الأشخاص والخدمات المطلوبة،
-        ثم راجع تفاصيل الطلب والمبلغ الكامل قبل اختيار طريقة الدفع.
-      </p>
+      <p>اختر موعد الحجز وعدد الأشخاص والخدمات المطلوبة، ثم راجع تفاصيل الطلب والمبلغ الكامل قبل اختيار طريقة الدفع.</p>
     </div>
   </header>
 
   <main class="container">
-
     <div id="systemError" class="system-error"></div>
-
-    <div id="closedMessage" class="closed-message">
-      الحجوزات متوقفة مؤقتًا. يرجى المحاولة لاحقًا.
-    </div>
-
+    <div id="closedMessage" class="closed-message">الحجوزات متوقفة مؤقتًا. يرجى المحاولة لاحقًا.</div>
     <div id="bookingApplication">
-
       <section class="progress-card">
         <div class="progress">
-
           <div class="progress-step active" data-progress="1">
             <div class="progress-number">1</div>
             <span>الحجز</span>
           </div>
-
           <div class="progress-step" data-progress="2">
             <div class="progress-number">2</div>
             <span>الخدمات</span>
           </div>
-
           <div class="progress-step" data-progress="3">
             <div class="progress-number">3</div>
             <span>المراجعة</span>
           </div>
-
           <div class="progress-step" data-progress="4">
             <div class="progress-number">4</div>
             <span>الدفع</span>
           </div>
-
         </div>
       </section>
 
       <section class="main-card">
-
+        <!-- step 1 -->
         <div class="step-page active" data-step="1">
-
           <div class="section-header">
             <div class="step-name">الخطوة الأولى</div>
             <h2>تفاصيل طلب الحجز</h2>
-            <p>
-              أدخل بيانات التواصل وحدد عدد الأشخاص وموعد الدخول والخروج.
-            </p>
+            <p>أدخل بيانات التواصل وحدد عدد الأشخاص وموعد الدخول والخروج.</p>
           </div>
-
           <h3 class="sub-title">معلومات التواصل</h3>
-
           <div class="grid">
-
             <div class="field full" id="field-fullName">
-              <label>
-                الاسم الكامل
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="fullName"
-                type="text"
-                placeholder="الاسم الكامل"
-              >
-
-              <div class="error-message">
-                يرجى إدخال الاسم الكامل.
-              </div>
+              <label>الاسم الكامل <span class="required">*</span></label>
+              <input id="fullName" type="text" placeholder="الاسم الكامل">
+              <div class="error-message">يرجى إدخال الاسم الكامل.</div>
             </div>
-
             <div class="field" id="field-phone">
-              <label>
-                رقم الجوال
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="phone"
-                type="tel"
-                inputmode="numeric"
-                placeholder="05XXXXXXXX"
-              >
-
-              <div class="error-message">
-                يرجى إدخال رقم الجوال.
-              </div>
+              <label>رقم الجوال <span class="required">*</span></label>
+              <input id="phone" type="tel" inputmode="numeric" placeholder="05XXXXXXXX">
+              <div class="error-message">يرجى إدخال رقم الجوال.</div>
             </div>
-
             <div class="field" id="field-city">
-              <label>
-                المدينة
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="city"
-                type="text"
-                placeholder="مثال: الرياض"
-              >
-
-              <div class="error-message">
-                يرجى إدخال المدينة.
-              </div>
+              <label>المدينة <span class="required">*</span></label>
+              <input id="city" type="text" placeholder="مثال: الرياض">
+              <div class="error-message">يرجى إدخال المدينة.</div>
             </div>
-
             <div class="field full">
               <label>الحي</label>
-
-              <input
-                id="district"
-                type="text"
-                placeholder="مثال: حي النرجس"
-              >
+              <input id="district" type="text" placeholder="مثال: حي النرجس">
             </div>
-
           </div>
-
           <h3 class="sub-title">نوع الحجز</h3>
-
           <div class="booking-types">
-
             <div class="booking-type">
-              <input
-                id="family"
-                type="radio"
-                name="bookingType"
-                value="عائلات"
-                checked
-              >
-
+              <input id="family" type="radio" name="bookingType" value="عائلات" checked>
               <label for="family">عائلات</label>
             </div>
-
             <div class="booking-type">
-              <input
-                id="men"
-                type="radio"
-                name="bookingType"
-                value="رجال"
-              >
-
+              <input id="men" type="radio" name="bookingType" value="رجال">
               <label for="men">رجال</label>
             </div>
-
             <div class="booking-type">
-              <input
-                id="women"
-                type="radio"
-                name="bookingType"
-                value="نساء"
-              >
-
+              <input id="women" type="radio" name="bookingType" value="نساء">
               <label for="women">نساء</label>
             </div>
-
           </div>
-
           <div class="grid">
-
             <div class="field">
-              <label>
-                عدد البالغين
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="adults"
-                type="number"
-                value="2"
-                min="1"
-                max="100"
-              >
+              <label>عدد البالغين <span class="required">*</span></label>
+              <input id="adults" type="number" value="2" min="1" max="100">
             </div>
-
             <div class="field">
               <label>عدد الأطفال</label>
-
-              <input
-                id="children"
-                type="number"
-                value="0"
-                min="0"
-                max="50"
-              >
+              <input id="children" type="number" value="0" min="0" max="50">
             </div>
-
           </div>
-
           <h3 class="sub-title">موعد الحجز</h3>
-
           <div class="grid">
-
             <div class="field" id="field-checkInDate">
-              <label>
-                تاريخ الدخول
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="checkInDate"
-                type="date"
-              >
-
-              <div class="error-message">
-                يرجى اختيار تاريخ الدخول.
-              </div>
+              <label>تاريخ الدخول <span class="required">*</span></label>
+              <input id="checkInDate" type="date">
+              <div class="error-message">يرجى اختيار تاريخ الدخول.</div>
             </div>
-
             <div class="field" id="field-checkInTime">
-              <label>
-                وقت الدخول
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="checkInTime"
-                type="time"
-                step="60"
-              >
-
-              <div class="error-message">
-                يرجى اختيار وقت الدخول.
-              </div>
+              <label>وقت الدخول <span class="required">*</span></label>
+              <input id="checkInTime" type="time" step="60">
+              <div class="error-message">يرجى اختيار وقت الدخول.</div>
             </div>
-
             <div class="field" id="field-checkOutDate">
-              <label>
-                تاريخ الخروج
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="checkOutDate"
-                type="date"
-              >
-
-              <div class="error-message">
-                تاريخ الخروج يجب أن يكون بعد تاريخ الدخول.
-              </div>
+              <label>تاريخ الخروج <span class="required">*</span></label>
+              <input id="checkOutDate" type="date">
+              <div class="error-message">تاريخ الخروج يجب أن يكون بعد تاريخ الدخول.</div>
             </div>
-
             <div class="field" id="field-checkOutTime">
-              <label>
-                وقت الخروج
-                <span class="required">*</span>
-              </label>
-
-              <input
-                id="checkOutTime"
-                type="time"
-                step="60"
-              >
-
-              <div class="error-message">
-                يرجى اختيار وقت الخروج.
-              </div>
+              <label>وقت الخروج <span class="required">*</span></label>
+              <input id="checkOutTime" type="time" step="60">
+              <div class="error-message">يرجى اختيار وقت الخروج.</div>
             </div>
-
             <div class="field full">
               <label>ملاحظات أو طلبات خاصة</label>
-
-              <textarea
-                id="notes"
-                placeholder="اكتب أي ملاحظات أو طلبات خاصة..."
-              ></textarea>
+              <textarea id="notes" placeholder="اكتب أي ملاحظات أو طلبات خاصة..."></textarea>
             </div>
-
           </div>
-
           <div class="prices-panel">
-            <div
-              id="pricesTitle"
-              class="prices-title"
-            >
-              أسعار الحجز
-            </div>
-
-            <div
-              id="pricesContainer"
-              class="prices-body"
-            ></div>
+            <div id="pricesTitle" class="prices-title">أسعار الحجز</div>
+            <div id="pricesContainer" class="prices-body"></div>
           </div>
-
-          <div
-            id="pricesDescription"
-            class="price-note"
-          ></div>
-
+          <div id="pricesDescription" class="price-note"></div>
           <div class="navigation-buttons">
-            <button
-              class="button button-primary"
-              type="button"
-              onclick="goToStep(2)"
-            >
-              التالي
-            </button>
+            <button class="button button-primary" type="button" onclick="goToStep(2)">التالي</button>
           </div>
-
         </div>
 
+        <!-- step 2 -->
         <div class="step-page" data-step="2">
-
           <div class="section-header">
             <div class="step-name">الخطوة الثانية</div>
             <h2>الخدمات الإضافية</h2>
-            <p>
-              اختر خدمة واحدة أو أكثر، أو حدد بدون خدمات إضافية.
-            </p>
+            <p>اختر خدمة واحدة أو أكثر، أو حدد بدون خدمات إضافية.</p>
           </div>
-
-          <div
-            id="servicesContainer"
-            class="services-list"
-          ></div>
-
-          <div
-            id="servicesError"
-            class="services-error"
-          >
-            يجب اختيار خدمة واحدة على الأقل أو اختيار بدون خدمات إضافية.
-          </div>
-
+          <div id="servicesContainer" class="services-list"></div>
+          <div id="servicesError" class="services-error">يجب اختيار خدمة واحدة على الأقل أو اختيار بدون خدمات إضافية.</div>
           <div class="navigation-buttons">
-
-            <button
-              class="button button-secondary"
-              type="button"
-              onclick="goToStep(1)"
-            >
-              رجوع
-            </button>
-
-            <button
-              class="button button-primary"
-              type="button"
-              onclick="goToStep(3)"
-            >
-              التالي
-            </button>
-
+            <button class="button button-secondary" type="button" onclick="goToStep(1)">رجوع</button>
+            <button class="button button-primary" type="button" onclick="goToStep(3)">التالي</button>
           </div>
-
         </div>
 
+        <!-- step 3 -->
         <div class="step-page" data-step="3">
-
           <div class="section-header">
             <div class="step-name">الخطوة الثالثة</div>
             <h2>مراجعة طلب الحجز</h2>
-            <p>
-              راجع البيانات، ويمكنك الرجوع للخطوات السابقة لإجراء أي تعديل.
-            </p>
+            <p>راجع البيانات، ويمكنك الرجوع للخطوات السابقة لإجراء أي تعديل.</p>
           </div>
-
           <div class="summary-box">
-            <div class="summary-title">
-              تفاصيل الحجز
-            </div>
-
+            <div class="summary-title">تفاصيل الحجز</div>
             <div class="summary-content">
-
-              <div class="summary-row">
-                <span>الاسم</span>
-                <strong id="summaryName">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>رقم الجوال</span>
-                <strong id="summaryPhone">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>الموقع</span>
-                <strong id="summaryLocation">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>نوع الحجز</span>
-                <strong id="summaryBookingType">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>عدد الأشخاص</span>
-                <strong id="summaryPeople">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>الملاحظات</span>
-                <strong id="summaryNotes">—</strong>
-              </div>
-
+              <div class="summary-row"><span>الاسم</span><strong id="summaryName">—</strong></div>
+              <div class="summary-row"><span>رقم الجوال</span><strong id="summaryPhone">—</strong></div>
+              <div class="summary-row"><span>الموقع</span><strong id="summaryLocation">—</strong></div>
+              <div class="summary-row"><span>نوع الحجز</span><strong id="summaryBookingType">—</strong></div>
+              <div class="summary-row"><span>عدد الأشخاص</span><strong id="summaryPeople">—</strong></div>
+              <div class="summary-row"><span>الملاحظات</span><strong id="summaryNotes">—</strong></div>
             </div>
           </div>
-
           <div class="summary-box">
-            <div class="summary-title">
-              الموعد والخدمات
-            </div>
-
+            <div class="summary-title">الموعد والخدمات</div>
             <div class="summary-content">
-
-              <div class="summary-row">
-                <span>موعد الدخول</span>
-                <strong id="summaryCheckIn">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>موعد الخروج</span>
-                <strong id="summaryCheckOut">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>مدة الحجز</span>
-                <strong id="summaryNights">—</strong>
-              </div>
-
-              <div class="summary-row">
-                <span>الخدمات المختارة</span>
-                <strong id="summaryServices">—</strong>
-              </div>
-
+              <div class="summary-row"><span>موعد الدخول</span><strong id="summaryCheckIn">—</strong></div>
+              <div class="summary-row"><span>موعد الخروج</span><strong id="summaryCheckOut">—</strong></div>
+              <div class="summary-row"><span>مدة الحجز</span><strong id="summaryNights">—</strong></div>
+              <div class="summary-row"><span>الخدمات المختارة</span><strong id="summaryServices">—</strong></div>
             </div>
           </div>
-
           <div class="amount-card">
-
-            <div class="amount-row">
-              <span>قيمة الإقامة</span>
-              <strong id="stayTotal">—</strong>
-            </div>
-
-            <div class="amount-row">
-              <span>الخدمات الإضافية</span>
-              <strong id="servicesTotal">—</strong>
-            </div>
-
-            <div class="amount-row">
-              <span>
-                التأمين المسترد
-                <small class="small-note">
-                  يعاد بعد انتهاء الحجز وفحص المكان
-                </small>
-              </span>
-
-              <strong id="insuranceTotal">—</strong>
-            </div>
-
-            <div class="amount-row total">
-              <span>المبلغ الكامل</span>
-              <strong id="grandTotal">—</strong>
-            </div>
-
+            <div class="amount-row"><span>قيمة الإقامة</span><strong id="stayTotal">—</strong></div>
+            <div class="amount-row"><span>الخدمات الإضافية</span><strong id="servicesTotal">—</strong></div>
+            <div class="amount-row"><span>التأمين المسترد<small class="small-note">يعاد بعد انتهاء الحجز وفحص المكان</small></span><strong id="insuranceTotal">—</strong></div>
+            <div class="amount-row total"><span>المبلغ الكامل</span><strong id="grandTotal">—</strong></div>
           </div>
-
-          <div
-            id="insuranceBox"
-            class="insurance-box"
-          >
-
-            <h3 id="insuranceTitle">
-              تفاصيل التأمين المسترد
-            </h3>
-
+          <div id="insuranceBox" class="insurance-box">
+            <h3 id="insuranceTitle">تفاصيل التأمين المسترد</h3>
             <p id="insuranceDescription"></p>
-
             <label class="agreement">
-              <input
-                id="insuranceAgreement"
-                type="checkbox"
-              >
-
-              <span>
-                قرأت شروط التأمين والاسترجاع وأوافق عليها.
-              </span>
+              <input id="insuranceAgreement" type="checkbox">
+              <span>قرأت شروط التأمين والاسترجاع وأوافق عليها.</span>
             </label>
-
           </div>
-
           <div class="navigation-buttons">
-
-            <button
-              class="button button-secondary"
-              type="button"
-              onclick="goToStep(2)"
-            >
-              رجوع
-            </button>
-
-            <button
-              class="button button-primary"
-              type="button"
-              onclick="continueToPayment()"
-            >
-              التالي
-            </button>
-
+            <button class="button button-secondary" type="button" onclick="goToStep(2)">رجوع</button>
+            <button class="button button-primary" type="button" onclick="continueToPayment()">التالي</button>
           </div>
-
         </div>
 
+        <!-- step 4 -->
         <div class="step-page" data-step="4">
-
           <div class="section-header">
             <div class="step-name">الخطوة الرابعة</div>
             <h2>اختر طريقة الدفع</h2>
-            <p>
-              اختر الطريقة المناسبة لإكمال عملية الدفع.
-            </p>
+            <p>اختر الطريقة المناسبة لإكمال عملية الدفع.</p>
           </div>
-
           <div class="payment-list">
-
-            <div
-              id="cardPaymentBox"
-              class="payment-item"
-            >
-
-              <input
-                id="cardPayment"
-                type="radio"
-                name="paymentMethod"
-                value="card"
-              >
-
+            <div id="cardPaymentBox" class="payment-item">
+              <input id="cardPayment" type="radio" name="paymentMethod" value="card">
               <label for="cardPayment">
-
                 <div class="payment-text">
-                  <strong id="cardPaymentName">
-                    بطاقة ائتمان
-                  </strong>
-
+                  <strong id="cardPaymentName">بطاقة ائتمان</strong>
                   <small id="cardPaymentDescription"></small>
                 </div>
-
                 <div class="payment-radio"></div>
-
               </label>
-
-              <div class="payment-error-text">
-                اختر طريقة الدفع للمتابعة.
-              </div>
-
+              <div class="payment-error-text">اختر طريقة الدفع للمتابعة.</div>
             </div>
-
-            <div
-              id="bankPaymentBox"
-              class="payment-item"
-            >
-
-              <input
-                id="bankPayment"
-                type="radio"
-                name="paymentMethod"
-                value="bank"
-              >
-
+            <div id="bankPaymentBox" class="payment-item">
+              <input id="bankPayment" type="radio" name="paymentMethod" value="bank">
               <label for="bankPayment">
-
                 <div class="payment-text">
-                  <strong id="bankPaymentName">
-                    تحويل بنكي
-                  </strong>
-
+                  <strong id="bankPaymentName">تحويل بنكي</strong>
                   <small id="bankPaymentDescription"></small>
                 </div>
-
                 <div class="payment-radio"></div>
-
               </label>
-
-              <div class="payment-error-text">
-                اختر طريقة الدفع للمتابعة.
-              </div>
-
+              <div class="payment-error-text">اختر طريقة الدفع للمتابعة.</div>
             </div>
-
           </div>
-
           <div class="amount-card">
-            <div
-              class="amount-row total"
-              style="border-top:0;margin-top:0;padding-top:0;"
-            >
+            <div class="amount-row total" style="border-top:0;margin-top:0;padding-top:0;">
               <span>المبلغ المطلوب</span>
               <strong id="paymentGrandTotal">—</strong>
             </div>
           </div>
-
           <div class="navigation-buttons">
-
-            <button
-              class="button button-secondary"
-              type="button"
-              onclick="goToStep(3)"
-            >
-              رجوع
-            </button>
-
-            <button
-              class="button button-primary"
-              type="button"
-              onclick="openSelectedPayment()"
-            >
-              الانتقال إلى الدفع
-            </button>
-
+            <button class="button button-secondary" type="button" onclick="goToStep(3)">رجوع</button>
+            <button class="button button-primary" type="button" onclick="openSelectedPayment()">الانتقال إلى الدفع</button>
           </div>
-
         </div>
-
       </section>
-
     </div>
-
   </main>
 
   <script>
@@ -1465,237 +914,108 @@
     let currentCalculation = null;
     let currentBookingNumber = "";
 
-    const checkInDate =
-      document.getElementById("checkInDate");
-
-    const checkOutDate =
-      document.getElementById("checkOutDate");
-
-    const checkInTime =
-      document.getElementById("checkInTime");
-
-    const checkOutTime =
-      document.getElementById("checkOutTime");
+    const checkInDate = document.getElementById("checkInDate");
+    const checkOutDate = document.getElementById("checkOutDate");
+    const checkInTime = document.getElementById("checkInTime");
+    const checkOutTime = document.getElementById("checkOutTime");
 
     async function loadStoreConfig() {
-      const response = await fetch(
-        `/api/store?t=${Date.now()}`,
-        {
-          headers: {
-            Accept: "application/json"
-          },
-          cache: "no-store"
-        }
-      );
-
+      const response = await fetch(`/api/store?t=${Date.now()}`, {
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+      });
       const data = await response.json();
-
       if (!response.ok || !data.ok) {
-        throw new Error(
-          data.error ||
-          "تعذر تحميل بيانات الحجز"
-        );
+        throw new Error(data.error || "تعذر تحميل بيانات الحجز");
       }
 
       const pricesMap = {};
-
       for (const price of data.prices || []) {
         pricesMap[price.price_key] = {
           key: price.price_key,
           name: price.title,
-          description:
-            price.description || "",
+          description: price.description || "",
           price: Number(price.price || 0),
-          visible:
-            Number(price.is_visible) === 1
+          visible: Number(price.is_visible) === 1
         };
       }
 
-      const specialPeriods =
-        (data.special_periods || []).map(
-          period => ({
-            id: Number(period.id),
-            type: period.period_type,
-            name: period.title,
-            description:
-              period.description || "",
-            start: period.start_date,
-            end: period.end_date,
-            price: Number(period.price || 0),
-            enabled:
-              Number(period.is_enabled) === 1,
-            visible:
-              Number(period.is_visible) === 1,
-            priority:
-              Number(period.priority || 0)
-          })
-        );
+      const specialPeriods = (data.special_periods || []).map(period => ({
+        id: Number(period.id),
+        type: period.period_type,
+        name: period.title,
+        description: period.description || "",
+        start: period.start_date,
+        end: period.end_date,
+        price: Number(period.price || 0),
+        enabled: Number(period.is_enabled) === 1,
+        visible: Number(period.is_visible) === 1,
+        priority: Number(period.priority || 0)
+      }));
 
       const paymentMap = {};
-
-      for (
-        const method of
-        data.payment_methods || []
-      ) {
+      for (const method of data.payment_methods || []) {
         paymentMap[method.method_key] = {
-          visible:
-            Number(method.is_enabled) === 1,
-
-          name:
-            method.title || "",
-
-          description:
-            method.description || "",
-
-          actionValue:
-            method.action_value || ""
+          visible: Number(method.is_enabled) === 1,
+          name: method.title || "",
+          description: method.description || "",
+          actionValue: method.action_value || ""
         };
       }
 
       STORE_CONFIG = {
-        bookingEnabled:
-          data.booking_enabled === true,
-
+        bookingEnabled: data.booking_enabled === true,
         prices: {
-          weekdays:
-            pricesMap.weekdays || {
-              key: "weekdays",
-              name: "أيام الأسبوع",
-              description: "",
-              price: 0,
-              visible: false
-            },
-
-          thursday:
-            pricesMap.thursday || {
-              key: "thursday",
-              name: "الخميس",
-              description: "",
-              price: 0,
-              visible: false
-            },
-
-          friday:
-            pricesMap.friday || {
-              key: "friday",
-              name: "الجمعة",
-              description: "",
-              price: 0,
-              visible: false
-            }
+          weekdays: pricesMap.weekdays || { key: "weekdays", name: "أيام الأسبوع", description: "", price: 0, visible: false },
+          thursday: pricesMap.thursday || { key: "thursday", name: "الخميس", description: "", price: 0, visible: false },
+          friday: pricesMap.friday || { key: "friday", name: "الجمعة", description: "", price: 0, visible: false }
         },
-
         specialPeriods,
-
-        services:
-          (data.services || []).map(
-            service => ({
-              id: Number(service.id),
-              name: service.name,
-              description:
-                service.description || "",
-              price:
-                Number(service.price || 0),
-              visible:
-                Number(
-                  service.is_visible
-                ) === 1
-            })
-          ),
-
+        services: (data.services || []).map(service => ({
+          id: Number(service.id),
+          name: service.name,
+          description: service.description || "",
+          price: Number(service.price || 0),
+          visible: Number(service.is_visible) === 1
+        })),
         insurance: {
-          visible:
-            data.insurance?.enabled === true,
-
-          amount:
-            Number(
-              data.insurance?.amount || 0
-            ),
-
-          title:
-            data.insurance?.title ||
-            "تفاصيل التأمين المسترد",
-
-          description:
-            data.insurance
-              ?.description || ""
+          visible: data.insurance?.enabled === true,
+          amount: Number(data.insurance?.amount || 0),
+          title: data.insurance?.title || "تفاصيل التأمين المسترد",
+          description: data.insurance?.description || ""
         },
-
         payment: {
-          card:
-            paymentMap.card || {
-              visible: false,
-              name: "بطاقة ائتمان",
-              description: "",
-              actionValue: ""
-            },
-
-          bank:
-            paymentMap.bank || {
-              visible: false,
-              name: "تحويل بنكي",
-              description: "",
-              actionValue: ""
-            }
+          card: paymentMap.card || { visible: false, name: "بطاقة ائتمان", description: "", actionValue: "" },
+          bank: paymentMap.bank || { visible: false, name: "تحويل بنكي", description: "", actionValue: "" }
         },
-
         site: {
-          pricesTitle:
-            data.site?.prices_title ||
-            "أسعار الحجز",
-
-          pricesDescription:
-            data.site
-              ?.prices_description || "",
-
-          whatsappNumber:
-            data.site
-              ?.whatsapp_number || "",
-
-          bankMessage:
-            data.site
-              ?.bank_whatsapp_message || ""
+          pricesTitle: data.site?.prices_title || "أسعار الحجز",
+          pricesDescription: data.site?.prices_description || "",
+          whatsappNumber: data.site?.whatsapp_number || "",
+          bankMessage: data.site?.bank_whatsapp_message || ""
         }
       };
     }
 
     function formatMoney(value) {
-      return (
-        Number(value || 0)
-          .toLocaleString("en-US") +
-        " ريال"
-      );
+      return Number(value || 0).toLocaleString("en-US") + " ريال";
     }
 
     function formatDate(value) {
-      if (!value) {
-        return "—";
-      }
-
+      if (!value) return "—";
       const parts = value.split("-");
-
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
     function formatArabicTime(value) {
-      if (!value) {
-        return "—";
-      }
-
+      if (!value) return "—";
       const parts = value.split(":");
       let hour = Number(parts[0]);
       const minute = parts[1];
       let period = "صباحًا";
-
-      if (hour === 12) {
-        period = "ظهرًا";
-      } else if (hour > 12) {
-        period = "مساءً";
-        hour -= 12;
-      } else if (hour === 0) {
-        hour = 12;
-      }
-
+      if (hour === 12) period = "ظهرًا";
+      else if (hour > 12) { period = "مساءً"; hour -= 12; }
+      else if (hour === 0) hour = 12;
       return `${hour}:${minute} ${period}`;
     }
 
@@ -1705,1155 +1025,506 @@
 
     function makeBookingNumber() {
       if (!currentBookingNumber) {
-        currentBookingNumber =
-          `BK-${Math.floor(
-            100000 +
-            Math.random() * 900000
-          )}`;
+        currentBookingNumber = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
       }
-
       return currentBookingNumber;
     }
 
     function setMinimumDate() {
       const today = new Date();
-
-      const value =
-        `${today.getFullYear()}-` +
-        `${String(
-          today.getMonth() + 1
-        ).padStart(2, "0")}-` +
-        `${String(
-          today.getDate()
-        ).padStart(2, "0")}`;
-
+      const value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
       checkInDate.min = value;
       checkOutDate.min = value;
     }
 
     function renderPrices() {
-      document.getElementById(
-        "pricesTitle"
-      ).textContent =
-        STORE_CONFIG.site.pricesTitle;
-
-      document.getElementById(
-        "pricesDescription"
-      ).textContent =
-        STORE_CONFIG.site.pricesDescription;
-
+      document.getElementById("pricesTitle").textContent = STORE_CONFIG.site.pricesTitle;
+      document.getElementById("pricesDescription").textContent = STORE_CONFIG.site.pricesDescription;
       const rows = [];
-
-      for (
-        const price of
-        Object.values(STORE_CONFIG.prices)
-      ) {
-        if (!price.visible) {
-          continue;
-        }
-
-        rows.push({
-          name: price.name,
-          description:
-            price.description,
-          price: price.price
-        });
+      for (const price of Object.values(STORE_CONFIG.prices)) {
+        if (!price.visible) continue;
+        rows.push({ name: price.name, description: price.description, price: price.price });
       }
-
-      for (
-        const period of
-        STORE_CONFIG.specialPeriods
-      ) {
-        if (
-          !period.enabled ||
-          !period.visible
-        ) {
-          continue;
-        }
-
+      for (const period of STORE_CONFIG.specialPeriods) {
+        if (!period.enabled || !period.visible) continue;
         rows.push({
           name: period.name,
-          description:
-            `${period.type === "season"
-              ? "موسم"
-              : "مناسبة"} من ${formatDate(period.start)} إلى ${formatDate(period.end)}`,
+          description: `${period.type === "season" ? "موسم" : "مناسبة"} من ${formatDate(period.start)} إلى ${formatDate(period.end)}`,
           price: period.price
         });
       }
-
-      document.getElementById(
-        "pricesContainer"
-      ).innerHTML =
-        rows.map(row => `
-          <div class="price-line">
-            <span>
-              ${escapeHtml(row.name)}
-              ${
-                row.description
-                  ? `<small>${escapeHtml(row.description)}</small>`
-                  : ""
-              }
-            </span>
-
-            <strong>
-              ${formatMoney(row.price)}
-            </strong>
-          </div>
-        `).join("");
+      document.getElementById("pricesContainer").innerHTML = rows.map(row => `
+        <div class="price-line">
+          <span>${escapeHtml(row.name)}${row.description ? `<small>${escapeHtml(row.description)}</small>` : ""}</span>
+          <strong>${formatMoney(row.price)}</strong>
+        </div>
+      `).join("");
     }
 
     function renderServices() {
-      const services =
-        STORE_CONFIG.services.filter(
-          service => service.visible
-        );
-
-      const servicesHtml =
-        services.map(service => `
-          <label
-            class="service-item"
-            data-service-id="${service.id}"
-          >
-            <input
-              class="service-checkbox"
-              type="checkbox"
-              value="${service.id}"
-              data-name="${escapeHtml(service.name)}"
-              data-price="${service.price}"
-            >
-
-            <span class="service-info">
-              <strong>
-                ${escapeHtml(service.name)}
-              </strong>
-
-              <small>
-                ${escapeHtml(service.description)}
-              </small>
-            </span>
-
-            <span class="service-price">
-              ${formatMoney(service.price)}
-            </span>
-          </label>
-        `).join("");
+      const services = STORE_CONFIG.services.filter(service => service.visible);
+      const servicesHtml = services.map(service => `
+        <label class="service-item" data-service-id="${service.id}">
+          <input class="service-checkbox" type="checkbox" value="${service.id}" data-name="${escapeHtml(service.name)}" data-price="${service.price}">
+          <span class="service-info">
+            <strong>${escapeHtml(service.name)}</strong>
+            <small>${escapeHtml(service.description)}</small>
+          </span>
+          <span class="service-price">${formatMoney(service.price)}</span>
+        </label>
+      `).join("");
 
       const noServicesHtml = `
-        <label
-          id="noServicesItem"
-          class="service-item no-services-item"
-        >
-          <input
-            id="noServices"
-            type="checkbox"
-          >
-
+        <label id="noServicesItem" class="service-item no-services-item">
+          <input id="noServices" type="checkbox">
           <span class="service-info">
-            <strong>
-              بدون خدمات إضافية
-            </strong>
-
-            <small>
-              متابعة الحجز دون إضافة أي خدمة.
-            </small>
+            <strong>بدون خدمات إضافية</strong>
+            <small>متابعة الحجز دون إضافة أي خدمة.</small>
           </span>
-
-          <span class="service-price">
-            0 ريال
-          </span>
+          <span class="service-price">0 ريال</span>
         </label>
       `;
-
-      document.getElementById(
-        "servicesContainer"
-      ).innerHTML =
-        servicesHtml + noServicesHtml;
-
+      document.getElementById("servicesContainer").innerHTML = servicesHtml + noServicesHtml;
       bindServiceEvents();
     }
 
     function bindServiceEvents() {
-      const serviceCheckboxes =
-        document.querySelectorAll(
-          ".service-checkbox"
-        );
-
-      const noServices =
-        document.getElementById(
-          "noServices"
-        );
-
-      serviceCheckboxes.forEach(
-        checkbox => {
-          checkbox.addEventListener(
-            "change",
-            () => {
-              if (checkbox.checked) {
-                noServices.checked = false;
-              }
-
-              clearServicesError();
-              updateServiceStyles();
-            }
-          );
-        }
-      );
-
-      noServices.addEventListener(
-        "change",
-        () => {
-          if (noServices.checked) {
-            serviceCheckboxes.forEach(
-              checkbox => {
-                checkbox.checked = false;
-              }
-            );
-          }
-
+      const serviceCheckboxes = document.querySelectorAll(".service-checkbox");
+      const noServices = document.getElementById("noServices");
+      serviceCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) noServices.checked = false;
           clearServicesError();
           updateServiceStyles();
+        });
+      });
+      noServices.addEventListener("change", () => {
+        if (noServices.checked) {
+          serviceCheckboxes.forEach(cb => cb.checked = false);
         }
-      );
+        clearServicesError();
+        updateServiceStyles();
+      });
     }
 
     function updateServiceStyles() {
-      document
-        .querySelectorAll(
-          ".service-item"
-        )
-        .forEach(item => {
-          const checkbox =
-            item.querySelector(
-              'input[type="checkbox"]'
-            );
-
-          item.classList.toggle(
-            "selected",
-            checkbox.checked
-          );
-        });
+      document.querySelectorAll(".service-item").forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        item.classList.toggle("selected", checkbox.checked);
+      });
     }
 
     function clearServicesError() {
-      document.getElementById(
-        "servicesError"
-      ).classList.remove("show");
-
-      document
-        .querySelectorAll(
-          ".service-item"
-        )
-        .forEach(item =>
-          item.classList.remove("error")
-        );
+      document.getElementById("servicesError").classList.remove("show");
+      document.querySelectorAll(".service-item").forEach(item => item.classList.remove("error"));
     }
 
     function validateServices() {
-      const selected =
-        document.querySelector(
-          ".service-checkbox:checked"
-        );
-
-      const noServices =
-        document.getElementById(
-          "noServices"
-        )?.checked;
-
+      const selected = document.querySelector(".service-checkbox:checked");
+      const noServices = document.getElementById("noServices")?.checked;
       if (!selected && !noServices) {
-        document.getElementById(
-          "servicesError"
-        ).classList.add("show");
-
-        document
-          .querySelectorAll(
-            ".service-item"
-          )
-          .forEach(item =>
-            item.classList.add("error")
-          );
-
+        document.getElementById("servicesError").classList.add("show");
+        document.querySelectorAll(".service-item").forEach(item => item.classList.add("error"));
         return false;
       }
-
       clearServicesError();
       return true;
     }
 
     function getSelectedServices() {
-      return [
-        ...document.querySelectorAll(
-          ".service-checkbox:checked"
-        )
-      ].map(checkbox => ({
+      return [...document.querySelectorAll(".service-checkbox:checked")].map(checkbox => ({
         id: Number(checkbox.value),
         name: checkbox.dataset.name,
-        price: Number(
-          checkbox.dataset.price
-        )
+        price: Number(checkbox.dataset.price)
       }));
     }
 
     function getBookingType() {
-      return document.querySelector(
-        'input[name="bookingType"]:checked'
-      )?.value || "عائلات";
+      return document.querySelector('input[name="bookingType"]:checked')?.value || "عائلات";
     }
 
-    function dateInsideRange(
-      date,
-      range
-    ) {
+    function dateInsideRange(date, range) {
       const value = date.getTime();
-      const start =
-        getDateObject(
-          range.start
-        ).getTime();
-
-      const end =
-        getDateObject(
-          range.end
-        ).getTime();
-
-      return (
-        value >= start &&
-        value <= end
-      );
+      const start = getDateObject(range.start).getTime();
+      const end = getDateObject(range.end).getTime();
+      return value >= start && value <= end;
     }
 
     function getPriceForDate(date) {
-      const matchingPeriods =
-        STORE_CONFIG.specialPeriods
-          .filter(
-            period =>
-              period.enabled &&
-              period.visible &&
-              dateInsideRange(
-                date,
-                period
-              )
-          )
-          .sort((a, b) => {
-            if (
-              a.type !== b.type
-            ) {
-              if (
-                a.type === "season"
-              ) {
-                return -1;
-              }
-
-              if (
-                b.type === "season"
-              ) {
-                return 1;
-              }
-            }
-
-            return (
-              b.priority -
-              a.priority
-            );
-          });
-
+      const matchingPeriods = STORE_CONFIG.specialPeriods
+        .filter(period => period.enabled && period.visible && dateInsideRange(date, period))
+        .sort((a, b) => {
+          if (a.type !== b.type) {
+            if (a.type === "season") return -1;
+            if (b.type === "season") return 1;
+          }
+          return b.priority - a.priority;
+        });
       if (matchingPeriods.length) {
-        const period =
-          matchingPeriods[0];
-
-        return {
-          price: period.price,
-          type:
-            period.type === "season"
-              ? "موسم"
-              : "مناسبة",
-          title: period.name
-        };
+        const period = matchingPeriods[0];
+        return { price: period.price, type: period.type === "season" ? "موسم" : "مناسبة", title: period.name };
       }
-
-      const day =
-        date.getDay();
-
-      if (
-        day === 4 &&
-        STORE_CONFIG.prices
-          .thursday.visible
-      ) {
-        return {
-          price:
-            STORE_CONFIG.prices
-              .thursday.price,
-
-          type: "thursday",
-
-          title:
-            STORE_CONFIG.prices
-              .thursday.name
-        };
+      const day = date.getDay();
+      if (day === 4 && STORE_CONFIG.prices.thursday.visible) {
+        return { price: STORE_CONFIG.prices.thursday.price, type: "thursday", title: STORE_CONFIG.prices.thursday.name };
       }
-
-      if (
-        day === 5 &&
-        STORE_CONFIG.prices
-          .friday.visible
-      ) {
-        return {
-          price:
-            STORE_CONFIG.prices
-              .friday.price,
-
-          type: "friday",
-
-          title:
-            STORE_CONFIG.prices
-              .friday.name
-        };
+      if (day === 5 && STORE_CONFIG.prices.friday.visible) {
+        return { price: STORE_CONFIG.prices.friday.price, type: "friday", title: STORE_CONFIG.prices.friday.name };
       }
-
-      return {
-        price:
-          STORE_CONFIG.prices
-            .weekdays.price,
-
-        type: "weekdays",
-
-        title:
-          STORE_CONFIG.prices
-            .weekdays.name
-      };
+      return { price: STORE_CONFIG.prices.weekdays.price, type: "weekdays", title: STORE_CONFIG.prices.weekdays.name };
     }
 
     function calculateBooking() {
-      const inValue =
-        checkInDate.value;
-
-      const outValue =
-        checkOutDate.value;
-
-      const services =
-        getSelectedServices();
-
-      const servicesTotal =
-        services.reduce(
-          (sum, service) =>
-            sum + service.price,
-          0
-        );
-
-      const insuranceTotal =
-        STORE_CONFIG.insurance.visible
-          ? STORE_CONFIG.insurance.amount
-          : 0;
-
-      if (
-        !inValue ||
-        !outValue
-      ) {
-        return {
-          ready: false,
-          nights: [],
-          nightsCount: 0,
-          stayTotal: 0,
-          services,
-          servicesTotal,
-          insuranceTotal,
-          total:
-            servicesTotal +
-            insuranceTotal
-        };
+      const inValue = checkInDate.value;
+      const outValue = checkOutDate.value;
+      const services = getSelectedServices();
+      const servicesTotal = services.reduce((sum, service) => sum + service.price, 0);
+      const insuranceTotal = STORE_CONFIG.insurance.visible ? STORE_CONFIG.insurance.amount : 0;
+      if (!inValue || !outValue) {
+        return { ready: false, nights: [], nightsCount: 0, stayTotal: 0, services, servicesTotal, insuranceTotal, total: servicesTotal + insuranceTotal };
       }
-
-      const start =
-        getDateObject(inValue);
-
-      const end =
-        getDateObject(outValue);
-
+      const start = getDateObject(inValue);
+      const end = getDateObject(outValue);
       if (!(end > start)) {
-        return {
-          ready: false,
-          nights: [],
-          nightsCount: 0,
-          stayTotal: 0,
-          services,
-          servicesTotal,
-          insuranceTotal,
-          total:
-            servicesTotal +
-            insuranceTotal
-        };
+        return { ready: false, nights: [], nightsCount: 0, stayTotal: 0, services, servicesTotal, insuranceTotal, total: servicesTotal + insuranceTotal };
       }
-
       const nights = [];
-      const cursor =
-        new Date(start);
-
+      const cursor = new Date(start);
       while (cursor < end) {
-        const pricing =
-          getPriceForDate(cursor);
-
-        const date =
-          `${cursor.getFullYear()}-` +
-          `${String(
-            cursor.getMonth() + 1
-          ).padStart(2, "0")}-` +
-          `${String(
-            cursor.getDate()
-          ).padStart(2, "0")}`;
-
-        nights.push({
-          date,
-          price: pricing.price,
-          type: pricing.type,
-          title: pricing.title
-        });
-
-        cursor.setDate(
-          cursor.getDate() + 1
-        );
+        const pricing = getPriceForDate(cursor);
+        const date = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(cursor.getDate()).padStart(2, "0")}`;
+        nights.push({ date, price: pricing.price, type: pricing.type, title: pricing.title });
+        cursor.setDate(cursor.getDate() + 1);
       }
-
-      const stayTotal =
-        nights.reduce(
-          (sum, night) =>
-            sum + night.price,
-          0
-        );
-
-      return {
-        ready: true,
-        nights,
-        nightsCount:
-          nights.length,
-        stayTotal,
-        services,
-        servicesTotal,
-        insuranceTotal,
-        total:
-          stayTotal +
-          servicesTotal +
-          insuranceTotal
-      };
+      const stayTotal = nights.reduce((sum, night) => sum + night.price, 0);
+      return { ready: true, nights, nightsCount: nights.length, stayTotal, services, servicesTotal, insuranceTotal, total: stayTotal + servicesTotal + insuranceTotal };
     }
 
     function clearFieldErrors() {
-      document
-        .querySelectorAll(
-          ".field.error"
-        )
-        .forEach(field =>
-          field.classList.remove(
-            "error"
-          )
-        );
+      document.querySelectorAll(".field.error").forEach(field => field.classList.remove("error"));
     }
 
-    function showFieldError(
-      id,
-      message
-    ) {
-      const field =
-        document.getElementById(
-          `field-${id}`
-        );
-
-      if (!field) {
-        return;
-      }
-
+    function showFieldError(id, message) {
+      const field = document.getElementById(`field-${id}`);
+      if (!field) return;
       field.classList.add("error");
-
-      const error =
-        field.querySelector(
-          ".error-message"
-        );
-
-      if (error && message) {
-        error.textContent = message;
-      }
+      const error = field.querySelector(".error-message");
+      if (error && message) error.textContent = message;
     }
 
     function validateFirstStep() {
       clearFieldErrors();
-
       let valid = true;
-
-      const fullName =
-        document.getElementById(
-          "fullName"
-        ).value.trim();
-
-      const phone =
-        document.getElementById(
-          "phone"
-        ).value.trim();
-
-      const city =
-        document.getElementById(
-          "city"
-        ).value.trim();
-
-      if (!fullName) {
-        showFieldError(
-          "fullName",
-          "يرجى إدخال الاسم الكامل."
-        );
-
-        valid = false;
+      const fullName = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const city = document.getElementById("city").value.trim();
+      if (!fullName) { showFieldError("fullName", "يرجى إدخال الاسم الكامل."); valid = false; }
+      if (!phone) { showFieldError("phone", "يرجى إدخال رقم الجوال."); valid = false; }
+      if (!city) { showFieldError("city", "يرجى إدخال المدينة."); valid = false; }
+      if (!checkInDate.value) { showFieldError("checkInDate", "يرجى اختيار تاريخ الدخول."); valid = false; }
+      if (!checkInTime.value) { showFieldError("checkInTime", "يرجى اختيار وقت الدخول."); valid = false; }
+      if (!checkOutDate.value) { showFieldError("checkOutDate", "يرجى اختيار تاريخ الخروج."); valid = false; }
+      if (!checkOutTime.value) { showFieldError("checkOutTime", "يرجى اختيار وقت الخروج."); valid = false; }
+      if (checkInDate.value && checkOutDate.value) {
+        const start = getDateObject(checkInDate.value);
+        const end = getDateObject(checkOutDate.value);
+        if (!(end > start)) { showFieldError("checkOutDate", "تاريخ الخروج يجب أن يكون بعد تاريخ الدخول."); valid = false; }
       }
-
-      if (!phone) {
-        showFieldError(
-          "phone",
-          "يرجى إدخال رقم الجوال."
-        );
-
-        valid = false;
-      }
-
-      if (!city) {
-        showFieldError(
-          "city",
-          "يرجى إدخال المدينة."
-        );
-
-        valid = false;
-      }
-
-      if (!checkInDate.value) {
-        showFieldError(
-          "checkInDate",
-          "يرجى اختيار تاريخ الدخول."
-        );
-
-        valid = false;
-      }
-
-      if (!checkInTime.value) {
-        showFieldError(
-          "checkInTime",
-          "يرجى اختيار وقت الدخول."
-        );
-
-        valid = false;
-      }
-
-      if (!checkOutDate.value) {
-        showFieldError(
-          "checkOutDate",
-          "يرجى اختيار تاريخ الخروج."
-        );
-
-        valid = false;
-      }
-
-      if (!checkOutTime.value) {
-        showFieldError(
-          "checkOutTime",
-          "يرجى اختيار وقت الخروج."
-        );
-
-        valid = false;
-      }
-
-      if (
-        checkInDate.value &&
-        checkOutDate.value
-      ) {
-        const start =
-          getDateObject(
-            checkInDate.value
-          );
-
-        const end =
-          getDateObject(
-            checkOutDate.value
-          );
-
-        if (!(end > start)) {
-          showFieldError(
-            "checkOutDate",
-            "تاريخ الخروج يجب أن يكون بعد تاريخ الدخول."
-          );
-
-          valid = false;
-        }
-      }
-
       if (!valid) {
-        document
-          .querySelector(
-            ".field.error"
-          )
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
+        document.querySelector(".field.error")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-
       return valid;
     }
 
     function updateReview() {
-      currentCalculation =
-        calculateBooking();
+      currentCalculation = calculateBooking();
+      const name = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const district = document.getElementById("district").value.trim();
+      const adults = Number(document.getElementById("adults").value) || 0;
+      const children = Number(document.getElementById("children").value) || 0;
+      const notes = document.getElementById("notes").value.trim();
 
-      const name =
-        document.getElementById(
-          "fullName"
-        ).value.trim();
-
-      const phone =
-        document.getElementById(
-          "phone"
-        ).value.trim();
-
-      const city =
-        document.getElementById(
-          "city"
-        ).value.trim();
-
-      const district =
-        document.getElementById(
-          "district"
-        ).value.trim();
-
-      const adults =
-        Number(
-          document.getElementById(
-            "adults"
-          ).value
-        ) || 0;
-
-      const children =
-        Number(
-          document.getElementById(
-            "children"
-          ).value
-        ) || 0;
-
-      const notes =
-        document.getElementById(
-          "notes"
-        ).value.trim();
-
-      document.getElementById(
-        "summaryName"
-      ).textContent = name;
-
-      document.getElementById(
-        "summaryPhone"
-      ).textContent = phone;
-
-      document.getElementById(
-        "summaryLocation"
-      ).textContent =
-        district
-          ? `${city}، ${district}`
-          : city;
-
-      document.getElementById(
-        "summaryBookingType"
-      ).textContent =
-        getBookingType();
-
-      document.getElementById(
-        "summaryPeople"
-      ).textContent =
-        `${adults + children} أشخاص — ` +
-        `${adults} بالغ، ${children} طفل`;
-
-      document.getElementById(
-        "summaryNotes"
-      ).textContent =
-        notes || "لا توجد";
-
-      document.getElementById(
-        "summaryCheckIn"
-      ).textContent =
-        `${formatDate(
-          checkInDate.value
-        )} — ${formatArabicTime(
-          checkInTime.value
-        )}`;
-
-      document.getElementById(
-        "summaryCheckOut"
-      ).textContent =
-        `${formatDate(
-          checkOutDate.value
-        )} — ${formatArabicTime(
-          checkOutTime.value
-        )}`;
-
-      document.getElementById(
-        "summaryNights"
-      ).textContent =
-        currentCalculation
-          .nightsCount === 1
-          ? "ليلة واحدة"
-          : `${currentCalculation.nightsCount} ليالٍ`;
-
-      document.getElementById(
-        "summaryServices"
-      ).textContent =
-        currentCalculation
-          .services.length
-          ? currentCalculation
-              .services
-              .map(
-                service =>
-                  service.name
-              )
-              .join("، ")
-          : "بدون خدمات إضافية";
-
-      document.getElementById(
-        "stayTotal"
-      ).textContent =
-        formatMoney(
-          currentCalculation
-            .stayTotal
-        );
-
-      document.getElementById(
-        "servicesTotal"
-      ).textContent =
-        formatMoney(
-          currentCalculation
-            .servicesTotal
-        );
-
-      document.getElementById(
-        "insuranceTotal"
-      ).textContent =
-        formatMoney(
-          currentCalculation
-            .insuranceTotal
-        );
-
-      document.getElementById(
-        "grandTotal"
-      ).textContent =
-        formatMoney(
-          currentCalculation.total
-        );
-
-      document.getElementById(
-        "paymentGrandTotal"
-      ).textContent =
-        formatMoney(
-          currentCalculation.total
-        );
+      document.getElementById("summaryName").textContent = name;
+      document.getElementById("summaryPhone").textContent = phone;
+      document.getElementById("summaryLocation").textContent = district ? `${city}، ${district}` : city;
+      document.getElementById("summaryBookingType").textContent = getBookingType();
+      document.getElementById("summaryPeople").textContent = `${adults + children} أشخاص — ${adults} بالغ، ${children} طفل`;
+      document.getElementById("summaryNotes").textContent = notes || "لا توجد";
+      document.getElementById("summaryCheckIn").textContent = `${formatDate(checkInDate.value)} — ${formatArabicTime(checkInTime.value)}`;
+      document.getElementById("summaryCheckOut").textContent = `${formatDate(checkOutDate.value)} — ${formatArabicTime(checkOutTime.value)}`;
+      document.getElementById("summaryNights").textContent = currentCalculation.nightsCount === 1 ? "ليلة واحدة" : `${currentCalculation.nightsCount} ليالٍ`;
+      document.getElementById("summaryServices").textContent = currentCalculation.services.length ? currentCalculation.services.map(s => s.name).join("، ") : "بدون خدمات إضافية";
+      document.getElementById("stayTotal").textContent = formatMoney(currentCalculation.stayTotal);
+      document.getElementById("servicesTotal").textContent = formatMoney(currentCalculation.servicesTotal);
+      document.getElementById("insuranceTotal").textContent = formatMoney(currentCalculation.insuranceTotal);
+      document.getElementById("grandTotal").textContent = formatMoney(currentCalculation.total);
+      document.getElementById("paymentGrandTotal").textContent = formatMoney(currentCalculation.total);
     }
 
     function updateProgress(step) {
-      document
-        .querySelectorAll(
-          ".progress-step"
-        )
-        .forEach(item => {
-          const number =
-            Number(
-              item.dataset.progress
-            );
-
-          item.classList.remove(
-            "active",
-            "done"
-          );
-
-          if (number < step) {
-            item.classList.add(
-              "done"
-            );
-          }
-
-          if (number === step) {
-            item.classList.add(
-              "active"
-            );
-          }
-        });
-    }
-
-    function goToStep(step) {
-      if (
-        step === 2 &&
-        !validateFirstStep()
-      ) {
-        return;
-      }
-
-      if (step === 3) {
-        if (!validateFirstStep()) {
-          return;
-        }
-
-        if (!validateServices()) {
-          return;
-        }
-
-        updateReview();
-      }
-
-      currentStep = step;
-
-      document
-        .querySelectorAll(
-          ".step-page"
-        )
-        .forEach(page =>
-          page.classList.remove(
-            "active"
-          )
-        );
-
-      document
-        .querySelector(
-          `.step-page[data-step="${step}"]`
-        )
-        .classList.add("active");
-
-      updateProgress(step);
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+      document.querySelectorAll(".progress-step").forEach(item => {
+        const number = Number(item.dataset.progress);
+        item.classList.remove("active", "done");
+        if (number < step) item.classList.add("done");
+        if (number === step) item.classList.add("active");
       });
     }
 
-    function continueToPayment() {
-      const agreement =
-        document.getElementById(
-          "insuranceAgreement"
-        );
+    function goToStep(step) {
+      if (step === 2 && !validateFirstStep()) return;
+      if (step === 3) {
+        if (!validateFirstStep()) return;
+        if (!validateServices()) return;
+        updateReview();
+      }
+      currentStep = step;
+      document.querySelectorAll(".step-page").forEach(page => page.classList.remove("active"));
+      document.querySelector(`.step-page[data-step="${step}"]`).classList.add("active");
+      updateProgress(step);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-      const box =
-        document.getElementById(
-          "insuranceBox"
-        );
+    /* ========== دوال الحجز والفاتورة ========== */
+    function buildBookingPayload(paymentMethod = "") {
+      currentCalculation = calculateBooking();
+      const adults = Number(document.getElementById("adults").value) || 0;
+      const children = Number(document.getElementById("children").value) || 0;
+      return {
+        booking_number: makeBookingNumber(),
+        payment_method: paymentMethod,
+        customer: {
+          full_name: document.getElementById("fullName").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          city: document.getElementById("city").value.trim(),
+          district: document.getElementById("district").value.trim(),
+          booking_type: getBookingType(),
+          adults,
+          children,
+          people_total: adults + children,
+          notes: document.getElementById("notes").value.trim()
+        },
+        booking: {
+          check_in_date: checkInDate.value,
+          check_in_time: checkInTime.value,
+          check_out_date: checkOutDate.value,
+          check_out_time: checkOutTime.value,
+          nights_count: currentCalculation.nightsCount,
+          nights: currentCalculation.nights,
+          services: currentCalculation.services
+        },
+        amounts: {
+          stay: currentCalculation.stayTotal,
+          services: currentCalculation.servicesTotal,
+          insurance: currentCalculation.insuranceTotal,
+          total: currentCalculation.total
+        }
+      };
+    }
 
-      if (
-        STORE_CONFIG.insurance
-          .visible &&
-        !agreement.checked
-      ) {
-        box.classList.add(
-          "error"
-        );
+    function drawRoundRect(context, x, y, width, height, radius, fill) {
+      context.beginPath();
+      context.roundRect(x, y, width, height, radius);
+      context.fillStyle = fill;
+      context.fill();
+    }
 
-        box.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
+    function drawInvoiceRow(context, label, value, y) {
+      context.textAlign = "right";
+      context.fillStyle = "#74807b";
+      context.font = "26px Tahoma, Arial";
+      context.fillText(label, 1080, y);
+      context.textAlign = "left";
+      context.fillStyle = "#1d2824";
+      context.font = "bold 26px Tahoma, Arial";
+      const shownValue = String(value || "—").slice(0, 55);
+      context.fillText(shownValue, 120, y);
+      context.strokeStyle = "#e2e8e5";
+      context.beginPath();
+      context.moveTo(110, y + 19);
+      context.lineTo(1090, y + 19);
+      context.stroke();
+    }
 
+    async function createInvoiceImage(data) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 1600;
+      const context = canvas.getContext("2d");
+      context.direction = "rtl";
+
+      context.fillStyle = "#f4f7f5";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawRoundRect(context, 50, 45, 1100, 175, 35, "#1f705a");
+      context.textAlign = "right";
+      context.fillStyle = "#ffffff";
+      context.font = "bold 46px Tahoma, Arial";
+      context.fillText("فاتورة طلب حجز", 1080, 115);
+      context.font = "26px Tahoma, Arial";
+      context.fillText(`رقم الحجز: ${data.booking_number}`, 1080, 165);
+
+      drawRoundRect(context, 50, 250, 1100, 610, 28, "#ffffff");
+      drawRoundRect(context, 50, 250, 1100, 78, 28, "#eaf5f1");
+      context.fillStyle = "#165342";
+      context.font = "bold 31px Tahoma, Arial";
+      context.fillText("تفاصيل الحجز", 1080, 302);
+
+      const location = data.customer.district ? `${data.customer.city}، ${data.customer.district}` : data.customer.city;
+      drawInvoiceRow(context, "الاسم", data.customer.full_name, 385);
+      drawInvoiceRow(context, "رقم الجوال", data.customer.phone, 450);
+      drawInvoiceRow(context, "الموقع", location, 515);
+      drawInvoiceRow(context, "نوع الحجز", data.customer.booking_type, 580);
+      drawInvoiceRow(context, "عدد الأشخاص", `${data.customer.people_total} أشخاص`, 645);
+      drawInvoiceRow(context, "الدخول", `${formatDate(data.booking.check_in_date)} — ${formatArabicTime(data.booking.check_in_time)}`, 710);
+      drawInvoiceRow(context, "الخروج", `${formatDate(data.booking.check_out_date)} — ${formatArabicTime(data.booking.check_out_time)}`, 775);
+      drawInvoiceRow(context, "مدة الحجز", data.booking.nights_count === 1 ? "ليلة واحدة" : `${data.booking.nights_count} ليالٍ`, 840);
+
+      drawRoundRect(context, 50, 900, 1100, 220, 28, "#ffffff");
+      drawRoundRect(context, 50, 900, 1100, 78, 28, "#eaf5f1");
+      context.fillStyle = "#165342";
+      context.font = "bold 31px Tahoma, Arial";
+      context.fillText("الخدمات والملاحظات", 1080, 952);
+
+      const services = data.booking.services.length ? data.booking.services.map(s => s.name).join("، ") : "بدون خدمات إضافية";
+      drawInvoiceRow(context, "الخدمات", services, 1030);
+      drawInvoiceRow(context, "الملاحظات", data.customer.notes || "لا توجد", 1095);
+
+      drawRoundRect(context, 50, 1165, 1100, 360, 30, "#1f705a");
+      context.fillStyle = "#ffffff";
+      context.font = "bold 29px Tahoma, Arial";
+      const amountRows = [["قيمة الإقامة", data.amounts.stay], ["الخدمات الإضافية", data.amounts.services], ["التأمين المسترد", data.amounts.insurance]];
+      let amountY = 1240;
+      for (const [label, amount] of amountRows) {
+        context.textAlign = "right";
+        context.fillText(label, 1080, amountY);
+        context.textAlign = "left";
+        context.fillText(formatMoney(amount), 120, amountY);
+        amountY += 70;
+      }
+      context.strokeStyle = "rgba(255,255,255,0.3)";
+      context.beginPath();
+      context.moveTo(105, 1435);
+      context.lineTo(1095, 1435);
+      context.stroke();
+      context.font = "bold 43px Tahoma, Arial";
+      context.textAlign = "right";
+      context.fillText("المبلغ الكامل", 1080, 1500);
+      context.textAlign = "left";
+      context.fillText(formatMoney(data.amounts.total), 120, 1500);
+
+      return canvas.toDataURL("image/png", 1);
+    }
+
+    async function sendBookingEvent(eventType, paymentMethod = "") {
+      const booking = buildBookingPayload(paymentMethod);
+      const invoiceImage = await createInvoiceImage(booking);
+      const response = await fetch("/api/booking-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event_type: eventType, booking, invoice_image: invoiceImage })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "تعذر إرسال بيانات الحجز");
+      }
+      return result;
+    }
+
+    async function continueToPayment() {
+      const agreement = document.getElementById("insuranceAgreement");
+      const box = document.getElementById("insuranceBox");
+      if (STORE_CONFIG.insurance.visible && !agreement.checked) {
+        box.classList.add("error");
+        box.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
-
-      box.classList.remove(
-        "error"
-      );
-
+      box.classList.remove("error");
+      updateReview();
       makeBookingNumber();
+      try {
+        await sendBookingEvent("payment_page");
+      } catch (error) {
+        alert("تعذر تجهيز طلب الحجز: " + error.message);
+        return;
+      }
       goToStep(4);
     }
 
     function clearPaymentError() {
-      document
-        .querySelectorAll(
-          ".payment-item"
-        )
-        .forEach(item => {
-          item.classList.remove(
-            "error",
-            "selected"
-          );
-        });
-
-      const selected =
-        document.querySelector(
-          'input[name="paymentMethod"]:checked'
-        );
-
+      document.querySelectorAll(".payment-item").forEach(item => {
+        item.classList.remove("error", "selected");
+      });
+      const selected = document.querySelector('input[name="paymentMethod"]:checked');
       if (selected) {
-        selected
-          .closest(
-            ".payment-item"
-          )
-          .classList.add(
-            "selected"
-          );
+        selected.closest(".payment-item").classList.add("selected");
       }
     }
 
     function showPaymentError() {
-      document
-        .querySelectorAll(
-          ".payment-item:not(.hidden)"
-        )
-        .forEach(item =>
-          item.classList.add(
-            "error"
-          )
-        );
-
-      document
-        .querySelector(
-          ".payment-list"
-        )
-        .scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
+      document.querySelectorAll(".payment-item:not(.hidden)").forEach(item => item.classList.add("error"));
+      document.querySelector(".payment-list").scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    function openSelectedPayment() {
-      const selected =
-        document.querySelector(
-          'input[name="paymentMethod"]:checked'
-        );
-
+    async function openSelectedPayment() {
+      const selected = document.querySelector('input[name="paymentMethod"]:checked');
       if (!selected) {
         showPaymentError();
         return;
       }
-
       clearPaymentError();
-
-      const calculation =
-        currentCalculation ||
-        calculateBooking();
-
-      if (
-        selected.value === "card"
-      ) {
-        const url =
-          STORE_CONFIG.payment
-            .card.actionValue;
-
+      updateReview();
+      try {
+        await sendBookingEvent("payment_click", selected.value);
+      } catch (error) {
+        alert("تعذر تحديث الحجز قبل الدفع: " + error.message);
+        return;
+      }
+      const calculation = currentCalculation || calculateBooking();
+      if (selected.value === "card") {
+        const url = STORE_CONFIG.payment.card.actionValue;
         if (!url) {
-          alert(
-            "رابط الدفع بالبطاقة غير مضاف حاليًا."
-          );
-
+          alert("رابط الدفع بالبطاقة غير مضاف حاليًا.");
           return;
         }
-
         window.location.href = url;
         return;
       }
-
-      if (
-        selected.value === "bank"
-      ) {
-        const number =
-          STORE_CONFIG.site
-            .whatsappNumber;
-
+      if (selected.value === "bank") {
+        const number = STORE_CONFIG.site.whatsappNumber;
         if (!number) {
-          alert(
-            "رقم واتساب التحويل غير مضاف حاليًا."
-          );
-
+          alert("رقم واتساب التحويل غير مضاف حاليًا.");
           return;
         }
-
-        let message =
-          STORE_CONFIG.site
-            .bankMessage ||
-          "السلام عليكم، أرغب بإكمال دفع الحجز رقم {booking_number} بمبلغ {amount} ريال.";
-
-        message = message
-          .replaceAll(
-            "{booking_number}",
-            makeBookingNumber()
-          )
-          .replaceAll(
-            "{amount}",
-            String(
-              calculation.total
-            )
-          );
-
-        window.location.href =
-          `https://wa.me/${number.replace(/\D/g, "")}` +
-          `?text=${encodeURIComponent(message)}`;
+        let message = STORE_CONFIG.site.bankMessage || "السلام عليكم، أرغب بإكمال دفع الحجز رقم {booking_number} بمبلغ {amount} ريال.";
+        message = message.replaceAll("{booking_number}", makeBookingNumber()).replaceAll("{amount}", String(calculation.total));
+        window.location.href = `https://wa.me/${number.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
       }
     }
 
     function renderInsurance() {
-      const box =
-        document.getElementById(
-          "insuranceBox"
-        );
-
-      if (
-        !STORE_CONFIG.insurance
-          .visible
-      ) {
+      const box = document.getElementById("insuranceBox");
+      if (!STORE_CONFIG.insurance.visible) {
         box.style.display = "none";
         return;
       }
-
       box.style.display = "block";
-
-      document.getElementById(
-        "insuranceTitle"
-      ).textContent =
-        STORE_CONFIG.insurance.title;
-
-      document.getElementById(
-        "insuranceDescription"
-      ).textContent =
-        STORE_CONFIG.insurance
-          .description;
+      document.getElementById("insuranceTitle").textContent = STORE_CONFIG.insurance.title;
+      document.getElementById("insuranceDescription").textContent = STORE_CONFIG.insurance.description;
     }
 
     function renderPaymentMethods() {
-      const card =
-        STORE_CONFIG.payment.card;
-
-      const bank =
-        STORE_CONFIG.payment.bank;
-
-      const cardBox =
-        document.getElementById(
-          "cardPaymentBox"
-        );
-
-      const bankBox =
-        document.getElementById(
-          "bankPaymentBox"
-        );
-
-      cardBox.classList.toggle(
-        "hidden",
-        !card.visible
-      );
-
-      bankBox.classList.toggle(
-        "hidden",
-        !bank.visible
-      );
-
-      document.getElementById(
-        "cardPaymentName"
-      ).textContent =
-        card.name;
-
-      document.getElementById(
-        "cardPaymentDescription"
-      ).textContent =
-        card.description;
-
-      document.getElementById(
-        "bankPaymentName"
-      ).textContent =
-        bank.name;
-
-      document.getElementById(
-        "bankPaymentDescription"
-      ).textContent =
-        bank.description;
+      const card = STORE_CONFIG.payment.card;
+      const bank = STORE_CONFIG.payment.bank;
+      const cardBox = document.getElementById("cardPaymentBox");
+      const bankBox = document.getElementById("bankPaymentBox");
+      cardBox.classList.toggle("hidden", !card.visible);
+      bankBox.classList.toggle("hidden", !bank.visible);
+      document.getElementById("cardPaymentName").textContent = card.name;
+      document.getElementById("cardPaymentDescription").textContent = card.description;
+      document.getElementById("bankPaymentName").textContent = bank.name;
+      document.getElementById("bankPaymentDescription").textContent = bank.description;
     }
 
     function escapeHtml(value) {
@@ -2866,24 +1537,12 @@
     }
 
     async function initializeApplication() {
-      const loading =
-        document.getElementById(
-          "loadingScreen"
-        );
-
+      const loading = document.getElementById("loadingScreen");
       try {
         await loadStoreConfig();
-
-        if (
-          !STORE_CONFIG.bookingEnabled
-        ) {
-          document.getElementById(
-            "bookingApplication"
-          ).style.display = "none";
-
-          document.getElementById(
-            "closedMessage"
-          ).style.display = "block";
+        if (!STORE_CONFIG.bookingEnabled) {
+          document.getElementById("bookingApplication").style.display = "none";
+          document.getElementById("closedMessage").style.display = "block";
         } else {
           renderPrices();
           renderServices();
@@ -2892,127 +1551,46 @@
           setMinimumDate();
         }
       } catch (error) {
-        document.getElementById(
-          "bookingApplication"
-        ).style.display = "none";
-
-        const errorBox =
-          document.getElementById(
-            "systemError"
-          );
-
-        errorBox.style.display =
-          "block";
-
-        errorBox.textContent =
-          "تعذر تحميل نظام الحجز: " +
-          error.message;
+        document.getElementById("bookingApplication").style.display = "none";
+        const errorBox = document.getElementById("systemError");
+        errorBox.style.display = "block";
+        errorBox.textContent = "تعذر تحميل نظام الحجز: " + error.message;
       } finally {
-        loading.style.display =
-          "none";
+        loading.style.display = "none";
       }
     }
 
-    checkInDate.addEventListener(
-      "change",
-      () => {
-        clearFieldErrors();
-
-        if (checkInDate.value) {
-          const nextDay =
-            getDateObject(
-              checkInDate.value
-            );
-
-          nextDay.setDate(
-            nextDay.getDate() + 1
-          );
-
-          const minimum =
-            `${nextDay.getFullYear()}-` +
-            `${String(
-              nextDay.getMonth() + 1
-            ).padStart(2, "0")}-` +
-            `${String(
-              nextDay.getDate()
-            ).padStart(2, "0")}`;
-
-          checkOutDate.min =
-            minimum;
-
-          if (
-            checkOutDate.value &&
-            getDateObject(
-              checkOutDate.value
-            ) <=
-            getDateObject(
-              checkInDate.value
-            )
-          ) {
-            checkOutDate.value =
-              "";
-          }
+    checkInDate.addEventListener("change", () => {
+      clearFieldErrors();
+      if (checkInDate.value) {
+        const nextDay = getDateObject(checkInDate.value);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const minimum = `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, "0")}-${String(nextDay.getDate()).padStart(2, "0")}`;
+        checkOutDate.min = minimum;
+        if (checkOutDate.value && getDateObject(checkOutDate.value) <= getDateObject(checkInDate.value)) {
+          checkOutDate.value = "";
         }
       }
-    );
+    });
 
-    checkOutDate.addEventListener(
-      "change",
-      () => {
-        clearFieldErrors();
-
-        if (
-          checkInDate.value &&
-          checkOutDate.value &&
-          getDateObject(
-            checkOutDate.value
-          ) <=
-          getDateObject(
-            checkInDate.value
-          )
-        ) {
-          showFieldError(
-            "checkOutDate",
-            "تاريخ الخروج يجب أن يكون بعد تاريخ الدخول."
-          );
-        }
+    checkOutDate.addEventListener("change", () => {
+      clearFieldErrors();
+      if (checkInDate.value && checkOutDate.value && getDateObject(checkOutDate.value) <= getDateObject(checkInDate.value)) {
+        showFieldError("checkOutDate", "تاريخ الخروج يجب أن يكون بعد تاريخ الدخول.");
       }
-    );
+    });
 
-    document
-      .querySelectorAll(
-        'input[name="paymentMethod"]'
-      )
-      .forEach(input => {
-        input.addEventListener(
-          "change",
-          clearPaymentError
-        );
-      });
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
+      input.addEventListener("change", clearPaymentError);
+    });
 
-    document
-      .getElementById(
-        "insuranceAgreement"
-      )
-      .addEventListener(
-        "change",
-        event => {
-          if (
-            event.target.checked
-          ) {
-            document
-              .getElementById(
-                "insuranceBox"
-              )
-              .classList.remove(
-                "error"
-              );
-          }
-        }
-      );
+    document.getElementById("insuranceAgreement").addEventListener("change", event => {
+      if (event.target.checked) {
+        document.getElementById("insuranceBox").classList.remove("error");
+      }
+    });
 
     initializeApplication();
   </script>
-
 </body>
   </html>
