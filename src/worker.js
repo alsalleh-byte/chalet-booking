@@ -1301,6 +1301,45 @@ async function handleCallbackQuery(
     return;
   }
 
+  if (data === "card_payment_url_edit") {
+    await setAdminState(
+      env,
+      chatId,
+      "card_payment_url_edit",
+      {}
+    );
+
+    await sendInputRequest(
+      env,
+      chatId,
+      "أرسل رابط بوابة الدفع كاملًا.\n\nمثال:\nhttps://payment.example.com/pay",
+      "menu_payments"
+    );
+
+    return;
+  }
+
+  if (
+    data === "bank_whatsapp_edit" ||
+    data === "site_whatsapp_edit"
+  ) {
+    await setAdminState(
+      env,
+      chatId,
+      "whatsapp_number_edit",
+      {}
+    );
+
+    await sendInputRequest(
+      env,
+      chatId,
+      "أرسل رقم واتساب بصيغة دولية بدون علامة + وبدون مسافات.\n\nمثال:\n966501234567",
+      "menu_payments"
+    );
+
+    return;
+  }
+
   if (
     data === "menu_payment_bot"
   ) {
@@ -2358,6 +2397,130 @@ async function handleAdminStateMessage(
     return true;
   }
 
+  if (
+    action ===
+    "card_payment_url_edit"
+  ) {
+    let paymentUrl;
+
+    try {
+      paymentUrl =
+        new URL(text.trim());
+    } catch {
+      await sendTelegramMessage(
+        env,
+        chatId,
+        "الرابط غير صحيح. أرسل رابطًا كاملًا يبدأ بـ https://"
+      );
+
+      return true;
+    }
+
+    if (
+      paymentUrl.protocol !==
+      "https:"
+    ) {
+      await sendTelegramMessage(
+        env,
+        chatId,
+        "يجب أن يبدأ رابط الدفع بـ https://"
+      );
+
+      return true;
+    }
+
+    await env.DB
+      .prepare(`
+        UPDATE payment_methods
+        SET
+          action_value = ?,
+          updated_at =
+            CURRENT_TIMESTAMP
+        WHERE method_key = 'card'
+      `)
+      .bind(paymentUrl.toString())
+      .run();
+
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await sendTelegramMessage(
+      env,
+      chatId,
+      "تم حفظ رابط بوابة الدفع بنجاح ✅"
+    );
+
+    await showPaymentMethodsMenu(
+      env,
+      chatId
+    );
+
+    return true;
+  }
+
+  if (
+    action ===
+    "whatsapp_number_edit"
+  ) {
+    const whatsappNumber =
+      text.replace(/\D/g, "");
+
+    if (
+      whatsappNumber.length < 8 ||
+      whatsappNumber.length > 15
+    ) {
+      await sendTelegramMessage(
+        env,
+        chatId,
+        "رقم واتساب غير صحيح.\n\nأرسله بصيغة دولية دون +، مثل:\n966501234567"
+      );
+
+      return true;
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO settings (
+          setting_key,
+          setting_value,
+          updated_at
+        )
+        VALUES (
+          'whatsapp_number',
+          ?,
+          CURRENT_TIMESTAMP
+        )
+        ON CONFLICT(setting_key)
+        DO UPDATE SET
+          setting_value =
+            excluded.setting_value,
+          updated_at =
+            CURRENT_TIMESTAMP
+      `)
+      .bind(whatsappNumber)
+      .run();
+
+    await clearAdminState(
+      env,
+      chatId
+    );
+
+    await sendTelegramMessage(
+      env,
+      chatId,
+      `تم حفظ رقم واتساب بنجاح ✅\n\n${whatsappNumber}`
+    );
+
+    await showPaymentMethodsMenu(
+      env,
+      chatId
+    );
+
+    return true;
+  }
+
   return false;
 }
 
@@ -2503,44 +2666,94 @@ async function showPaymentMethodsMenu(
     .prepare(`
       SELECT
         id,
+        method_key,
         title,
         description,
+        action_value,
         is_enabled
       FROM payment_methods
       ORDER BY sort_order ASC
     `)
     .all();
 
+  const settings = await getSettingsMap(
+    env,
+    [
+      "whatsapp_number"
+    ]
+  );
+
   const methods =
     result.results || [];
+
+  const cardMethod =
+    methods.find(
+      method =>
+        method.method_key === "card"
+    );
+
+  const bankMethod =
+    methods.find(
+      method =>
+        method.method_key === "bank"
+    );
 
   let text =
     "💳 طرق الدفع\n\n";
 
-  for (
-    const method of methods
-  ) {
+  if (cardMethod) {
     text +=
-      `${method.is_enabled ? "✅" : "🚫"} ${method.title}\n` +
-      `${method.description}\n\n`;
+      `${cardMethod.is_enabled ? "✅" : "🚫"} ` +
+      `${cardMethod.title}\n` +
+      `${cardMethod.description}\n` +
+      `رابط الدفع: ${
+        cardMethod.action_value ||
+        "غير مضاف"
+      }\n\n`;
   }
 
-  const keyboard =
-    methods.map(method => [
-      {
-        text: method.title,
-        callback_data:
-          `payment_edit:${method.id}`
-      },
+  if (bankMethod) {
+    text +=
+      `${bankMethod.is_enabled ? "✅" : "🚫"} ` +
+      `${bankMethod.title}\n` +
+      `${bankMethod.description}\n` +
+      `رقم واتساب: ${
+        settings.whatsapp_number ||
+        "غير مضاف"
+      }\n`;
+  }
+
+  const keyboard = [];
+
+  for (const method of methods) {
+    keyboard.push([
       {
         text:
           method.is_enabled
-            ? "إيقاف"
-            : "تشغيل",
+            ? `⏸ إيقاف ${method.title}`
+            : `▶️ تشغيل ${method.title}`,
+
         callback_data:
           `payment_toggle:${method.id}`
       }
     ]);
+  }
+
+  keyboard.push([
+    {
+      text: "🔗 تعديل رابط بوابة الدفع",
+      callback_data:
+        "card_payment_url_edit"
+    }
+  ]);
+
+  keyboard.push([
+    {
+      text: "📱 تعديل رقم واتساب",
+      callback_data:
+        "bank_whatsapp_edit"
+    }
+  ]);
 
   keyboard.push(
     backButton()
@@ -3038,4 +3251,4 @@ function getErrorMessage(error) {
   return error instanceof Error
     ? error.message
     : String(error);
-      }
+  }
