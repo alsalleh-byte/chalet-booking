@@ -3676,61 +3676,38 @@ async function saveOrUpdateBooking(
         grand_total,
         selected_payment_method,
         payment_status,
-        booking_status,
-        created_at,
-        updated_at
+        booking_status
       )
       VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, 'pending', ?, 
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP
+        ?, 'pending', ?
       )
       ON CONFLICT(booking_number)
       DO UPDATE SET
-        full_name =
-          excluded.full_name,
-        phone =
-          excluded.phone,
-        city =
-          excluded.city,
-        district =
-          excluded.district,
-        booking_type =
-          excluded.booking_type,
-        adults =
-          excluded.adults,
-        children =
-          excluded.children,
-        people_total =
-          excluded.people_total,
-        check_in_date =
-          excluded.check_in_date,
-        check_in_time =
-          excluded.check_in_time,
-        check_out_date =
-          excluded.check_out_date,
-        check_out_time =
-          excluded.check_out_time,
-        nights_count =
-          excluded.nights_count,
-        notes =
-          excluded.notes,
-        stay_total =
-          excluded.stay_total,
-        services_total =
-          excluded.services_total,
-        insurance_total =
-          excluded.insurance_total,
-        grand_total =
-          excluded.grand_total,
+        full_name = excluded.full_name,
+        phone = excluded.phone,
+        city = excluded.city,
+        district = excluded.district,
+        booking_type = excluded.booking_type,
+        adults = excluded.adults,
+        children = excluded.children,
+        people_total = excluded.people_total,
+        check_in_date = excluded.check_in_date,
+        check_in_time = excluded.check_in_time,
+        check_out_date = excluded.check_out_date,
+        check_out_time = excluded.check_out_time,
+        nights_count = excluded.nights_count,
+        notes = excluded.notes,
+        stay_total = excluded.stay_total,
+        services_total = excluded.services_total,
+        insurance_total = excluded.insurance_total,
+        grand_total = excluded.grand_total,
         selected_payment_method =
           excluded.selected_payment_method,
         booking_status =
           excluded.booking_status,
-        updated_at =
-          CURRENT_TIMESTAMP
+        updated_at = CURRENT_TIMESTAMP
     `)
     .bind(
       data.booking_number,
@@ -3739,38 +3716,21 @@ async function saveOrUpdateBooking(
       customer.city,
       customer.district || "",
       customer.booking_type,
-      Number(
-        customer.adults || 0
-      ),
-      Number(
-        customer.children || 0
-      ),
-      Number(
-        customer.people_total || 0
-      ),
+      Number(customer.adults || 0),
+      Number(customer.children || 0),
+      Number(customer.people_total || 0),
       booking.check_in_date,
       booking.check_in_time,
       booking.check_out_date,
       booking.check_out_time,
-      Number(
-        booking.nights_count || 0
-      ),
+      Number(booking.nights_count || 0),
       customer.notes || "",
-      Number(
-        amounts.stay || 0
-      ),
-      Number(
-        amounts.services || 0
-      ),
-      Number(
-        amounts.insurance || 0
-      ),
-      Number(
-        amounts.total || 0
-      ),
+      Number(amounts.stay || 0),
+      Number(amounts.services || 0),
+      Number(amounts.insurance || 0),
+      Number(amounts.total || 0),
       paymentMethod,
-      eventType ===
-        "payment_click"
+      eventType === "payment_click"
         ? "payment_selected"
         : "payment_page"
     )
@@ -4116,4 +4076,4 @@ function getErrorMessage(error) {
   return error instanceof Error
     ? error.message
     : String(error);
-      }
+        }
