@@ -375,6 +375,13 @@ export default {
     }
 
     if (
+      url.pathname === "/api/store" &&
+      request.method === "GET"
+    ) {
+      return getStoreData(env);
+    }
+
+    if (
       url.pathname === "/setup-webhook" &&
       request.method === "GET"
     ) {
@@ -495,6 +502,157 @@ async function databaseStatus(env) {
       {
         ok: false,
         database_connected: false,
+        error: getErrorMessage(error)
+      },
+      500
+    );
+  }
+}
+
+async function getStoreData(env) {
+  try {
+    const pricesResult = await env.DB
+      .prepare(`
+        SELECT
+          id,
+          price_key,
+          title,
+          description,
+          price,
+          is_visible,
+          sort_order
+        FROM booking_prices
+        WHERE is_visible = 1
+        ORDER BY sort_order ASC
+      `)
+      .all();
+
+    const servicesResult = await env.DB
+      .prepare(`
+        SELECT
+          id,
+          name,
+          description,
+          price,
+          is_visible,
+          sort_order
+        FROM services
+        WHERE is_deleted = 0
+          AND is_visible = 1
+        ORDER BY sort_order ASC, id ASC
+      `)
+      .all();
+
+    const periodsResult = await env.DB
+      .prepare(`
+        SELECT
+          id,
+          period_type,
+          title,
+          description,
+          start_date,
+          end_date,
+          price,
+          is_enabled,
+          is_visible,
+          priority
+        FROM special_periods
+        WHERE is_enabled = 1
+          AND is_visible = 1
+        ORDER BY priority DESC, id DESC
+      `)
+      .all();
+
+    const paymentMethodsResult = await env.DB
+      .prepare(`
+        SELECT
+          id,
+          method_key,
+          title,
+          description,
+          action_text,
+          action_value,
+          is_enabled,
+          sort_order
+        FROM payment_methods
+        WHERE is_enabled = 1
+        ORDER BY sort_order ASC
+      `)
+      .all();
+
+    const settingsResult = await env.DB
+      .prepare(`
+        SELECT
+          setting_key,
+          setting_value
+        FROM settings
+      `)
+      .all();
+
+    const settings = {};
+
+    for (const row of settingsResult.results || []) {
+      settings[row.setting_key] =
+        row.setting_value;
+    }
+
+    return jsonResponse({
+      ok: true,
+
+      booking_enabled:
+        settings.booking_enabled === "true",
+
+      prices: pricesResult.results || [],
+
+      services:
+        servicesResult.results || [],
+
+      special_periods:
+        periodsResult.results || [],
+
+      payment_methods:
+        paymentMethodsResult.results || [],
+
+      insurance: {
+        enabled:
+          settings.insurance_enabled === "true",
+
+        title:
+          settings.insurance_title ||
+          "تفاصيل التأمين المسترد",
+
+        amount:
+          Number(
+            settings.insurance_amount || 0
+          ),
+
+        description:
+          settings.insurance_description || ""
+      },
+
+      site: {
+        prices_title:
+          settings.prices_section_title ||
+          "أسعار الحجز",
+
+        prices_description:
+          settings.prices_section_description ||
+          "",
+
+        whatsapp_number:
+          settings.whatsapp_number || "",
+
+        bank_whatsapp_text:
+          settings.bank_whatsapp_text || "",
+
+        bank_whatsapp_message:
+          settings.bank_whatsapp_message || ""
+      }
+    });
+  } catch (error) {
+    return jsonResponse(
+      {
+        ok: false,
         error: getErrorMessage(error)
       },
       500
@@ -2880,4 +3038,4 @@ function getErrorMessage(error) {
   return error instanceof Error
     ? error.message
     : String(error);
-             }
+      }
