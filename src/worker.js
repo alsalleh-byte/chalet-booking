@@ -349,36 +349,68 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/setup-db") {
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders()
+      });
+    }
+
+    if (
+      url.pathname === "/setup-db" &&
+      request.method === "GET"
+    ) {
       return setupDatabase(env);
     }
 
-    if (url.pathname === "/api/status") {
-      return Response.json({
+    if (
+      url.pathname === "/api/status" &&
+      request.method === "GET"
+    ) {
+      return jsonResponse({
         ok: true,
         message: "Chalet booking API is working"
       });
     }
 
-    if (url.pathname === "/api/db-status") {
+    if (
+      url.pathname === "/api/db-status" &&
+      request.method === "GET"
+    ) {
       return databaseStatus(env);
+    }
+
+    if (
+      url.pathname === "/setup-webhook" &&
+      request.method === "GET"
+    ) {
+      return setupTelegramWebhook(request, env);
+    }
+
+    if (
+      url.pathname === "/telegram" &&
+      request.method === "POST"
+    ) {
+      return handleTelegramWebhook(request, env);
     }
 
     return env.ASSETS.fetch(request);
   }
 };
 
+/* =========================
+   إعداد قاعدة البيانات
+========================= */
+
 async function setupDatabase(env) {
   try {
     if (!env.DB) {
-      return Response.json(
+      return jsonResponse(
         {
           ok: false,
           error: "لم يتم العثور على ربط قاعدة البيانات DB"
         },
-        {
-          status: 500
-        }
+        500
       );
     }
 
@@ -389,10 +421,6 @@ async function setupDatabase(env) {
 
     let executedCount = 0;
 
-    /*
-      ننفذ الأوامر على دفعات صغيرة حتى لا تفشل D1
-      عند وجود عدد كبير من الأوامر.
-    */
     for (
       let startIndex = 0;
       startIndex < statements.length;
@@ -404,61 +432,35 @@ async function setupDatabase(env) {
       );
 
       await env.DB.batch(
-        group.map(sql =>
-          env.DB.prepare(sql)
-        )
+        group.map(sql => env.DB.prepare(sql))
       );
 
       executedCount += group.length;
     }
 
-    const tablesResult = await env.DB
-      .prepare(`
-        SELECT name
-        FROM sqlite_master
-        WHERE type = 'table'
-          AND name NOT LIKE 'sqlite_%'
-        ORDER BY name
-      `)
-      .all();
-
-    return Response.json({
+    return jsonResponse({
       ok: true,
       message:
         "تم إنشاء جداول قاعدة البيانات والبيانات الأساسية بنجاح",
-      statements_executed: executedCount,
-      tables: tablesResult.results
+      statements_executed: executedCount
     });
   } catch (error) {
-    return Response.json(
+    return jsonResponse(
       {
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : String(error)
+        error: getErrorMessage(error)
       },
-      {
-        status: 500
-      }
+      500
     );
   }
 }
 
+/* =========================
+   فحص قاعدة البيانات
+========================= */
+
 async function databaseStatus(env) {
   try {
-    if (!env.DB) {
-      return Response.json(
-        {
-          ok: false,
-          error: "لم يتم العثور على ربط قاعدة البيانات DB"
-        },
-        {
-          status: 500
-        }
-      );
-    }
-
     const tablesResult = await env.DB
       .prepare(`
         SELECT name
@@ -491,7 +493,7 @@ async function databaseStatus(env) {
       `)
       .first();
 
-    return Response.json({
+    return jsonResponse({
       ok: true,
       database_connected: true,
       tables: tablesResult.results,
@@ -500,18 +502,1209 @@ async function databaseStatus(env) {
         Number(servicesCountResult?.total || 0)
     });
   } catch (error) {
-    return Response.json(
+    return jsonResponse(
       {
         ok: false,
         database_connected: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : String(error)
+        error: getErrorMessage(error)
       },
-      {
-        status: 500
-      }
+      500
     );
   }
 }
+
+/* =========================
+   ربط Webhook البوت
+========================= */
+
+async function setupTelegramWebhook(request, env) {
+  try {
+    if (!env.ADMIN_BOT_TOKEN) {
+      throw new Error("ADMIN_BOT_TOKEN غير موجود");
+    }
+
+    if (!env.ADMIN_CHAT_ID) {
+      throw new Error("ADMIN_CHAT_ID غير موجود");
+    }
+
+    const url = new URL(request.url);
+    const key = url.searchParams.get("key");
+
+    if (
+      String(key || "") !==
+      String(env.ADMIN_CHAT_ID)
+    ) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "غير مصرح"
+        },
+        403
+      );
+    }
+
+    const webhookUrl = `${url.origin}/telegram`;
+
+    const result = await telegramApi(
+      env,
+      "setWebhook",
+      {
+        url: webhookUrl,
+        allowed_updates: [
+          "message",
+          "callback_query"
+        ],
+        drop_pending_updates: true
+      }
+    );
+
+    return jsonResponse({
+      ok: true,
+      message: "تم ربط بوت الإدارة بنجاح",
+      webhook_url: webhookUrl,
+      telegram: result.result
+    });
+  } catch (error) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: getErrorMessage(error)
+      },
+      500
+    );
+  }
+}
+
+/* =========================
+   استقبال تحديثات البوت
+========================= */
+
+async function handleTelegramWebhook(request, env) {
+  try {
+    const update = await request.json();
+
+    const senderId =
+      update.message?.from?.id ??
+      update.callback_query?.from?.id;
+
+    if (
+      String(senderId || "") !==
+      String(env.ADMIN_CHAT_ID)
+    ) {
+      return jsonResponse({
+        ok: true,
+        ignored: true
+      });
+    }
+
+    if (update.callback_query) {
+      await handleCallbackQuery(
+        update.callback_query,
+        env
+      );
+
+      return jsonResponse({
+        ok: true
+      });
+    }
+
+    if (update.message) {
+      await handleAdminMessage(
+        update.message,
+        env
+      );
+    }
+
+    return jsonResponse({
+      ok: true
+    });
+  } catch (error) {
+    console.error(
+      "Telegram webhook error:",
+      error
+    );
+
+    return jsonResponse({
+      ok: true,
+      handled: false
+    });
+  }
+}
+
+/* =========================
+   رسائل المدير
+========================= */
+
+async function handleAdminMessage(message, env) {
+  const chatId = message.chat.id;
+  const text = String(message.text || "").trim();
+
+  if (
+    text === "/start" ||
+    text === "/menu" ||
+    text === "القائمة"
+  ) {
+    await sendMainMenu(env, chatId);
+    return;
+  }
+
+  await sendMainMenu(
+    env,
+    chatId,
+    "اختر القسم المطلوب من الأزرار:"
+  );
+}
+
+/* =========================
+   ضغط الأزرار
+========================= */
+
+async function handleCallbackQuery(callback, env) {
+  const callbackId = callback.id;
+  const chatId = callback.message?.chat?.id;
+  const data = String(callback.data || "");
+
+  await answerCallback(env, callbackId);
+
+  if (!chatId) {
+    return;
+  }
+
+  if (data === "main_menu") {
+    await sendMainMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_prices") {
+    await showPricesMenu(env, chatId);
+    return;
+  }
+
+  if (data.startsWith("price_toggle:")) {
+    const id = Number(data.split(":")[1]);
+    await togglePrice(env, id);
+    await showPricesMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_services") {
+    await showServicesMenu(env, chatId);
+    return;
+  }
+
+  if (data.startsWith("service_toggle:")) {
+    const id = Number(data.split(":")[1]);
+    await toggleService(env, id);
+    await showServicesMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_periods") {
+    await showPeriodsMenu(env, chatId);
+    return;
+  }
+
+  if (data.startsWith("period_toggle:")) {
+    const id = Number(data.split(":")[1]);
+    await togglePeriod(env, id);
+    await showPeriodsMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_insurance") {
+    await showInsuranceMenu(env, chatId);
+    return;
+  }
+
+  if (data === "insurance_toggle") {
+    await toggleSettingBoolean(
+      env,
+      "insurance_enabled"
+    );
+
+    await showInsuranceMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_payments") {
+    await showPaymentMethodsMenu(env, chatId);
+    return;
+  }
+
+  if (data.startsWith("payment_toggle:")) {
+    const id = Number(data.split(":")[1]);
+    await togglePaymentMethod(env, id);
+    await showPaymentMethodsMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_payment_bot") {
+    await showPaymentBotMenu(env, chatId);
+    return;
+  }
+
+  if (data === "payment_bot_toggle") {
+    await togglePaymentBotForwarding(env);
+    await showPaymentBotMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_bookings") {
+    await showBookingsMenu(env, chatId);
+    return;
+  }
+
+  if (data === "menu_site") {
+    await showSiteSettingsMenu(env, chatId);
+    return;
+  }
+
+  if (data === "booking_toggle") {
+    await toggleSettingBoolean(
+      env,
+      "booking_enabled"
+    );
+
+    await showSiteSettingsMenu(env, chatId);
+    return;
+  }
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    "هذا الزر سيتم تفعيل التعديل الخاص به في الخطوة التالية.",
+    {
+      inline_keyboard: [
+        backButton()
+      ]
+    }
+  );
+}
+
+/* =========================
+   القائمة الرئيسية
+========================= */
+
+async function sendMainMenu(
+  env,
+  chatId,
+  message =
+    "لوحة إدارة نظام حجز الشاليه\n\nاختر القسم المطلوب:"
+) {
+  await sendTelegramMessage(
+    env,
+    chatId,
+    message,
+    {
+      inline_keyboard: [
+        [
+          {
+            text: "💰 الأسعار",
+            callback_data: "menu_prices"
+          },
+          {
+            text: "🧰 الخدمات",
+            callback_data: "menu_services"
+          }
+        ],
+        [
+          {
+            text: "📅 المواسم والمناسبات",
+            callback_data: "menu_periods"
+          }
+        ],
+        [
+          {
+            text: "🛡 التأمين المسترد",
+            callback_data: "menu_insurance"
+          },
+          {
+            text: "💳 طرق الدفع",
+            callback_data: "menu_payments"
+          }
+        ],
+        [
+          {
+            text: "🤖 بوت الدفع",
+            callback_data: "menu_payment_bot"
+          }
+        ],
+        [
+          {
+            text: "📋 طلبات الحجز",
+            callback_data: "menu_bookings"
+          },
+          {
+            text: "⚙️ إعدادات الموقع",
+            callback_data: "menu_site"
+          }
+        ]
+      ]
+    }
+  );
+}
+
+/* =========================
+   الأسعار
+========================= */
+
+async function showPricesMenu(env, chatId) {
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        id,
+        title,
+        description,
+        price,
+        is_visible
+      FROM booking_prices
+      ORDER BY sort_order ASC
+    `)
+    .all();
+
+  const prices = result.results || [];
+
+  let text = "💰 أسعار الحجز\n\n";
+
+  for (const item of prices) {
+    text +=
+      `${item.is_visible ? "✅" : "🚫"} ` +
+      `${item.title}\n` +
+      `السعر: ${formatMoney(item.price)}\n` +
+      `${item.description || ""}\n\n`;
+  }
+
+  const keyboard = prices.map(item => [
+    {
+      text:
+        `✏️ ${item.title} — ${formatMoney(item.price)}`,
+      callback_data: `price_edit:${item.id}`
+    },
+    {
+      text: item.is_visible ? "إخفاء" : "إظهار",
+      callback_data: `price_toggle:${item.id}`
+    }
+  ]);
+
+  keyboard.push([
+    {
+      text: "📝 تعديل النص أسفل الأسعار",
+      callback_data: "prices_description_edit"
+    }
+  ]);
+
+  keyboard.push(backButton());
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: keyboard
+    }
+  );
+}
+
+async function togglePrice(env, id) {
+  await env.DB
+    .prepare(`
+      UPDATE booking_prices
+      SET
+        is_visible = CASE
+          WHEN is_visible = 1 THEN 0
+          ELSE 1
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    .bind(id)
+    .run();
+}
+
+/* =========================
+   الخدمات
+========================= */
+
+async function showServicesMenu(env, chatId) {
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        id,
+        name,
+        description,
+        price,
+        is_visible
+      FROM services
+      WHERE is_deleted = 0
+      ORDER BY sort_order ASC, id ASC
+    `)
+    .all();
+
+  const services = result.results || [];
+
+  let text = "🧰 الخدمات الإضافية\n\n";
+
+  if (!services.length) {
+    text += "لا توجد خدمات.";
+  } else {
+    for (const service of services) {
+      text +=
+        `${service.is_visible ? "✅" : "🚫"} ` +
+        `${service.name}\n` +
+        `${formatMoney(service.price)}\n` +
+        `${service.description}\n\n`;
+    }
+  }
+
+  const keyboard = [
+    [
+      {
+        text: "➕ إضافة خدمة",
+        callback_data: "service_add"
+      }
+    ]
+  ];
+
+  for (const service of services) {
+    keyboard.push([
+      {
+        text: `✏️ ${service.name}`,
+        callback_data:
+          `service_edit:${service.id}`
+      },
+      {
+        text:
+          service.is_visible
+            ? "إخفاء"
+            : "إظهار",
+        callback_data:
+          `service_toggle:${service.id}`
+      }
+    ]);
+  }
+
+  keyboard.push(backButton());
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: keyboard
+    }
+  );
+}
+
+async function toggleService(env, id) {
+  await env.DB
+    .prepare(`
+      UPDATE services
+      SET
+        is_visible = CASE
+          WHEN is_visible = 1 THEN 0
+          ELSE 1
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND is_deleted = 0
+    `)
+    .bind(id)
+    .run();
+}
+
+/* =========================
+   المواسم والمناسبات
+========================= */
+
+async function showPeriodsMenu(env, chatId) {
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        id,
+        period_type,
+        title,
+        start_date,
+        end_date,
+        price,
+        is_enabled
+      FROM special_periods
+      ORDER BY priority DESC, id DESC
+    `)
+    .all();
+
+  const periods = result.results || [];
+
+  let text = "📅 المواسم والمناسبات\n\n";
+
+  if (!periods.length) {
+    text += "لا توجد مواسم أو مناسبات مضافة.";
+  } else {
+    for (const period of periods) {
+      const typeName =
+        period.period_type === "season"
+          ? "موسم"
+          : "مناسبة";
+
+      text +=
+        `${period.is_enabled ? "✅" : "⏸"} ` +
+        `${typeName}: ${period.title}\n` +
+        `من: ${period.start_date}\n` +
+        `إلى: ${period.end_date}\n` +
+        `السعر: ${formatMoney(period.price)}\n\n`;
+    }
+  }
+
+  const keyboard = [
+    [
+      {
+        text: "➕ إضافة موسم",
+        callback_data: "season_add"
+      },
+      {
+        text: "➕ إضافة مناسبة",
+        callback_data: "occasion_add"
+      }
+    ]
+  ];
+
+  for (const period of periods) {
+    keyboard.push([
+      {
+        text: `✏️ ${period.title}`,
+        callback_data:
+          `period_edit:${period.id}`
+      },
+      {
+        text:
+          period.is_enabled
+            ? "إيقاف"
+            : "تشغيل",
+        callback_data:
+          `period_toggle:${period.id}`
+      }
+    ]);
+  }
+
+  keyboard.push(backButton());
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: keyboard
+    }
+  );
+}
+
+async function togglePeriod(env, id) {
+  await env.DB
+    .prepare(`
+      UPDATE special_periods
+      SET
+        is_enabled = CASE
+          WHEN is_enabled = 1 THEN 0
+          ELSE 1
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    .bind(id)
+    .run();
+}
+
+/* =========================
+   التأمين
+========================= */
+
+async function showInsuranceMenu(env, chatId) {
+  const settings = await getSettingsMap(
+    env,
+    [
+      "insurance_enabled",
+      "insurance_title",
+      "insurance_amount",
+      "insurance_description"
+    ]
+  );
+
+  const enabled =
+    settings.insurance_enabled === "true";
+
+  const text =
+    "🛡 التأمين المسترد\n\n" +
+    `الحالة: ${enabled ? "مفعّل ✅" : "متوقف 🚫"}\n` +
+    `العنوان: ${settings.insurance_title || "—"}\n` +
+    `المبلغ: ${formatMoney(
+      settings.insurance_amount || 0
+    )}\n\n` +
+    `النص:\n${
+      settings.insurance_description || "لا يوجد"
+    }`;
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: [
+        [
+          {
+            text: "💵 تعديل المبلغ",
+            callback_data:
+              "insurance_amount_edit"
+          },
+          {
+            text: "📝 تعديل النص",
+            callback_data:
+              "insurance_text_edit"
+          }
+        ],
+        [
+          {
+            text:
+              enabled
+                ? "⏸ إيقاف التأمين"
+                : "▶️ تشغيل التأمين",
+            callback_data: "insurance_toggle"
+          }
+        ],
+        backButton()
+      ]
+    }
+  );
+}
+
+/* =========================
+   طرق الدفع
+========================= */
+
+async function showPaymentMethodsMenu(
+  env,
+  chatId
+) {
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        id,
+        method_key,
+        title,
+        description,
+        action_value,
+        is_enabled
+      FROM payment_methods
+      ORDER BY sort_order ASC
+    `)
+    .all();
+
+  const methods = result.results || [];
+
+  let text = "💳 طرق الدفع\n\n";
+
+  for (const method of methods) {
+    text +=
+      `${method.is_enabled ? "✅" : "🚫"} ` +
+      `${method.title}\n` +
+      `${method.description}\n\n`;
+  }
+
+  const keyboard = [];
+
+  for (const method of methods) {
+    keyboard.push([
+      {
+        text: `✏️ ${method.title}`,
+        callback_data:
+          `payment_edit:${method.id}`
+      },
+      {
+        text:
+          method.is_enabled
+            ? "إيقاف"
+            : "تشغيل",
+        callback_data:
+          `payment_toggle:${method.id}`
+      }
+    ]);
+  }
+
+  keyboard.push([
+    {
+      text: "🔗 رابط دفع البطاقة",
+      callback_data:
+        "card_payment_url_edit"
+    }
+  ]);
+
+  keyboard.push([
+    {
+      text: "📱 رقم واتساب التحويل",
+      callback_data:
+        "bank_whatsapp_edit"
+    }
+  ]);
+
+  keyboard.push(backButton());
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: keyboard
+    }
+  );
+}
+
+async function togglePaymentMethod(env, id) {
+  await env.DB
+    .prepare(`
+      UPDATE payment_methods
+      SET
+        is_enabled = CASE
+          WHEN is_enabled = 1 THEN 0
+          ELSE 1
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    .bind(id)
+    .run();
+}
+
+/* =========================
+   بوت الدفع
+========================= */
+
+async function showPaymentBotMenu(env, chatId) {
+  const settings = await env.DB
+    .prepare(`
+      SELECT
+        bot_username,
+        bot_chat_id,
+        forward_enabled,
+        amount_prefix,
+        test_amount
+      FROM payment_bot_settings
+      WHERE id = 1
+    `)
+    .first();
+
+  const enabled =
+    Number(settings?.forward_enabled || 0) === 1;
+
+  const text =
+    "🤖 إعدادات بوت الدفع\n\n" +
+    `البوت: ${
+      settings?.bot_username || "غير مضاف"
+    }\n` +
+    `معرف المحادثة: ${
+      settings?.bot_chat_id || "غير محدد"
+    }\n` +
+    `إرسال المبلغ: ${
+      enabled ? "مفعّل ✅" : "متوقف 🚫"
+    }\n` +
+    `صيغة العملة: ${
+      settings?.amount_prefix || "SAR"
+    }\n\n` +
+    "مثال الإرسال:\n" +
+    `${settings?.amount_prefix || "SAR"} 6.500`;
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: [
+        [
+          {
+            text: "➕ إضافة/تغيير البوت",
+            callback_data:
+              "payment_bot_set"
+          }
+        ],
+        [
+          {
+            text:
+              enabled
+                ? "⏸ إيقاف الإرسال"
+                : "▶️ تشغيل الإرسال",
+            callback_data:
+              "payment_bot_toggle"
+          }
+        ],
+        [
+          {
+            text: "🧪 اختبار SAR 10",
+            callback_data:
+              "payment_bot_test"
+          }
+        ],
+        [
+          {
+            text: "🗑 حذف الربط",
+            callback_data:
+              "payment_bot_delete"
+          }
+        ],
+        backButton()
+      ]
+    }
+  );
+}
+
+async function togglePaymentBotForwarding(env) {
+  await env.DB
+    .prepare(`
+      UPDATE payment_bot_settings
+      SET
+        forward_enabled = CASE
+          WHEN forward_enabled = 1 THEN 0
+          ELSE 1
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `)
+    .run();
+}
+
+/* =========================
+   الحجوزات
+========================= */
+
+async function showBookingsMenu(env, chatId) {
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        booking_number,
+        full_name,
+        phone,
+        check_in_date,
+        check_out_date,
+        grand_total,
+        booking_status
+      FROM bookings
+      ORDER BY id DESC
+      LIMIT 10
+    `)
+    .all();
+
+  const bookings = result.results || [];
+
+  let text = "📋 آخر طلبات الحجز\n\n";
+
+  if (!bookings.length) {
+    text += "لا توجد طلبات حجز حتى الآن.";
+  } else {
+    for (const booking of bookings) {
+      text +=
+        `رقم: ${booking.booking_number}\n` +
+        `العميل: ${booking.full_name}\n` +
+        `الجوال: ${booking.phone}\n` +
+        `الدخول: ${booking.check_in_date}\n` +
+        `الخروج: ${booking.check_out_date}\n` +
+        `المبلغ: ${formatMoney(
+          booking.grand_total
+        )}\n` +
+        `الحالة: ${booking.booking_status}\n\n`;
+    }
+  }
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: [
+        [
+          {
+            text: "🔄 تحديث القائمة",
+            callback_data: "menu_bookings"
+          }
+        ],
+        backButton()
+      ]
+    }
+  );
+}
+
+/* =========================
+   إعدادات الموقع
+========================= */
+
+async function showSiteSettingsMenu(
+  env,
+  chatId
+) {
+  const settings = await getSettingsMap(
+    env,
+    [
+      "booking_enabled",
+      "prices_section_title",
+      "prices_section_description",
+      "whatsapp_number"
+    ]
+  );
+
+  const bookingEnabled =
+    settings.booking_enabled === "true";
+
+  const text =
+    "⚙️ إعدادات الموقع\n\n" +
+    `الحجز: ${
+      bookingEnabled
+        ? "مفتوح ✅"
+        : "متوقف 🚫"
+    }\n` +
+    `عنوان الأسعار: ${
+      settings.prices_section_title ||
+      "أسعار الحجز"
+    }\n` +
+    `واتساب الإدارة: ${
+      settings.whatsapp_number ||
+      "غير مضاف"
+    }`;
+
+  await sendTelegramMessage(
+    env,
+    chatId,
+    text,
+    {
+      inline_keyboard: [
+        [
+          {
+            text:
+              bookingEnabled
+                ? "⏸ إيقاف الحجوزات"
+                : "▶️ تشغيل الحجوزات",
+            callback_data: "booking_toggle"
+          }
+        ],
+        [
+          {
+            text: "📝 تعديل عنوان الأسعار",
+            callback_data:
+              "prices_title_edit"
+          }
+        ],
+        [
+          {
+            text: "📱 تعديل واتساب الإدارة",
+            callback_data:
+              "site_whatsapp_edit"
+          }
+        ],
+        backButton()
+      ]
+    }
+  );
+}
+
+/* =========================
+   الإعدادات
+========================= */
+
+async function getSettingsMap(env, keys) {
+  if (!keys.length) {
+    return {};
+  }
+
+  const placeholders =
+    keys.map(() => "?").join(",");
+
+  const result = await env.DB
+    .prepare(`
+      SELECT
+        setting_key,
+        setting_value
+      FROM settings
+      WHERE setting_key IN (${placeholders})
+    `)
+    .bind(...keys)
+    .all();
+
+  const settings = {};
+
+  for (const row of result.results || []) {
+    settings[row.setting_key] =
+      row.setting_value;
+  }
+
+  return settings;
+}
+
+async function toggleSettingBoolean(
+  env,
+  settingKey
+) {
+  const current = await env.DB
+    .prepare(`
+      SELECT setting_value
+      FROM settings
+      WHERE setting_key = ?
+    `)
+    .bind(settingKey)
+    .first();
+
+  const newValue =
+    current?.setting_value === "true"
+      ? "false"
+      : "true";
+
+  await env.DB
+    .prepare(`
+      INSERT INTO settings (
+        setting_key,
+        setting_value,
+        updated_at
+      )
+      VALUES (?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(setting_key)
+      DO UPDATE SET
+        setting_value = excluded.setting_value,
+        updated_at = CURRENT_TIMESTAMP
+    `)
+    .bind(settingKey, newValue)
+    .run();
+}
+
+/* =========================
+   Telegram API
+========================= */
+
+async function telegramApi(
+  env,
+  method,
+  payload
+) {
+  if (!env.ADMIN_BOT_TOKEN) {
+    throw new Error(
+      "ADMIN_BOT_TOKEN غير موجود"
+    );
+  }
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${env.ADMIN_BOT_TOKEN}/${method}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok || !result.ok) {
+    throw new Error(
+      result.description ||
+      `Telegram API error: ${method}`
+    );
+  }
+
+  return result;
+}
+
+async function sendTelegramMessage(
+  env,
+  chatId,
+  text,
+  replyMarkup = null
+) {
+  const payload = {
+    chat_id: chatId,
+    text
+  };
+
+  if (replyMarkup) {
+    payload.reply_markup = replyMarkup;
+  }
+
+  return telegramApi(
+    env,
+    "sendMessage",
+    payload
+  );
+}
+
+async function answerCallback(
+  env,
+  callbackId
+) {
+  if (!callbackId) {
+    return;
+  }
+
+  try {
+    await telegramApi(
+      env,
+      "answerCallbackQuery",
+      {
+        callback_query_id: callbackId
+      }
+    );
+  } catch (error) {
+    console.error(
+      "answerCallbackQuery error:",
+      error
+    );
+  }
+}
+
+/* =========================
+   أدوات عامة
+========================= */
+
+function backButton() {
+  return [
+    {
+      text: "⬅️ رجوع للقائمة",
+      callback_data: "main_menu"
+    }
+  ];
+}
+
+function formatMoney(value) {
+  return (
+    Number(value || 0)
+      .toLocaleString("en-US") +
+    " ريال"
+  );
+}
+
+function getErrorMessage(error) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+}
+
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods":
+      "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type"
+  };
+}
+
+function jsonResponse(
+  data,
+  status = 200
+) {
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      headers: {
+        "Content-Type":
+          "application/json; charset=utf-8",
+        ...corsHeaders()
+      }
+    }
+  );
+  }
