@@ -8,6 +8,14 @@
     "binding": "ASSETS"
   },
 
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chalet_booking_db",
+      "database_id": "44c4be3e-2c7d-4264-8c99-28515cf63969"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }
