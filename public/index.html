@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>طلب حجز</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #1f705a;
+      --primary-dark: #174f40;
+      --background: #f4f7f5;
+      --card: #ffffff;
+      --text: #1e2925;
+      --muted: #74807b;
+      --border: #dfe7e3;
+      --shadow: 0 16px 42px rgba(22, 67, 53, 0.1);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background: var(--background);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 45px 20px 85px;
+      color: white;
+      background: linear-gradient(
+        135deg,
+        var(--primary-dark),
+        var(--primary)
+      );
+      border-radius: 0 0 35px 35px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 300px;
+      top: -65px;
+      left: -55px;
+      opacity: 0.12;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 340'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M142 93c-26-38-64-53-112-44 30 30 64 45 105 45-35 4-69 24-96 57 45 4 81-7 109-34-10 38-6 73 11 106 17-37 20-73 9-108 30 25 66 36 109 31-27-31-59-48-97-52 39-4 70-20 93-49-45-5-82 8-108 39 2-40-10-74-37-101-12 41-7 77 14 110z'/%3E%3Cpath d='M137 103c10 4 18 12 21 23 14 54 21 109 22 165h-48c14-58 21-115 20-171-1-7-6-13-15-17z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 820px);
+      margin: auto;
+    }
+
+    .badge {
+      width: fit-content;
+      margin-bottom: 16px;
+      padding: 8px 14px;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: 30px;
+    }
+
+    .hero p {
+      max-width: 600px;
+      font-size: 14px;
+      line-height: 2;
+      opacity: 0.92;
+    }
+
+    .container {
+      width: min(calc(100% - 28px), 820px);
+      margin: auto;
+    }
+
+    .card {
+      position: relative;
+      z-index: 3;
+      margin-top: -42px;
+      padding: 25px 18px;
+      background: var(--card);
+      border-radius: 27px;
+      box-shadow: var(--shadow);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 22px;
+      padding: 16px;
+      color: var(--primary-dark);
+      background: #eaf5f1;
+      border: 1px solid #d8eae3;
+      border-radius: 18px;
+    }
+
+    .status-icon {
+      width: 43px;
+      height: 43px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      background: var(--primary);
+      border-radius: 50%;
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .status strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .status small {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .api-test {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 18px;
+      color: white;
+      background: var(--primary);
+      border: 0;
+      border-radius: 15px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .api-test:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    #apiResult {
+      display: none;
+      margin-top: 15px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: #fafcfb;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    #apiResult.success {
+      display: block;
+      color: #176044;
+      border-color: #cfe7dc;
+      background: #edf8f3;
+    }
+
+    #apiResult.error {
+      display: block;
+      color: #a13737;
+      border-color: #f0cece;
+      background: #fff1f1;
+    }
+
+    .note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.9;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="hero">
+    <div class="hero-content">
+
+      <div class="badge">
+        نظام حجز إلكتروني
+      </div>
+
+      <h1>طلب حجز</h1>
+
+      <p>
+        تم تجهيز الصفحة الأساسية للمشروع.
+        بعد التأكد من نجاح النشر سنضيف نموذج الحجز الكامل،
+        إدارة الأسعار والخدمات والدفع والفواتير.
+      </p>
+
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="card">
+
+      <div class="status">
+
+        <div class="status-icon">
+          ✓
+        </div>
+
+        <div>
+          <strong>واجهة الموقع جاهزة للاختبار</strong>
+
+          <small>
+            اضغط الزر للتأكد من اتصال الصفحة مع Cloudflare Worker.
+          </small>
+        </div>
+
+      </div>
+
+      <button
+        id="apiButton"
+        class="api-test"
+        type="button"
+      >
+        اختبار اتصال النظام
+      </button>
+
+      <div id="apiResult"></div>
+
+      <div class="note">
+        هذه صفحة تشغيل أولية فقط.
+        سيتم استبدالها بعد نجاح الربط بكود تصميم الحجز الكامل.
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const apiButton =
+      document.getElementById("apiButton");
+
+    const apiResult =
+      document.getElementById("apiResult");
+
+    apiButton.addEventListener(
+      "click",
+      async () => {
+        apiButton.disabled = true;
+        apiButton.textContent =
+          "جاري اختبار الاتصال...";
+
+        apiResult.className = "";
+        apiResult.style.display = "none";
+
+        try {
+          const response = await fetch(
+            "/api/status"
+          );
+
+          const data = await response.json();
+
+          if (!response.ok || !data.ok) {
+            throw new Error(
+              data.message ||
+              "تعذر الاتصال بالنظام"
+            );
+          }
+
+          apiResult.className = "success";
+
+          apiResult.textContent =
+            "تم الاتصال بنجاح: " +
+            data.message;
+
+        } catch (error) {
+          apiResult.className = "error";
+
+          apiResult.textContent =
+            "فشل الاتصال: " +
+            error.message;
+        } finally {
+          apiButton.disabled = false;
+
+          apiButton.textContent =
+            "اختبار اتصال النظام";
+        }
+      }
+    );
+  </script>
+
+</body>
+</html>
